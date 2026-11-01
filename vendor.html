@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendor Supply Portal | La Tavola</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="staff-portal-page">
+
+    <!-- NAVBAR -->
+    <header class="staff-portal-navbar">
+        <div class="portal-brand">
+            <a href="index.html" class="logo">
+                <span>LA TAVOLA</span>
+                <small>RESTAURANT</small>
+            </a>
+            <span class="portal-role-badge badge-vendor">◈ Vendor & Supplier Portal</span>
+        </div>
+
+        <div class="portal-nav-actions">
+            <a href="index.html" class="portal-nav-link">Website</a>
+
+            <div class="role-switcher-dropdown">
+                <button type="button" class="role-switcher-btn" onclick="toggleRoleDropdown()">
+                    <span>Switch Role</span>
+                    <small>▾</small>
+                </button>
+                <div class="role-dropdown-menu" id="role-menu">
+                    <a href="staff-role.html">Role Directory</a>
+                    <a href="owner.html">Owner Portal</a>
+                    <a href="manager.html">Manager Portal</a>
+                    <a href="chef.html">Chef KDS</a>
+                    <a href="customer.html">Customer View</a>
+                </div>
+            </div>
+
+            <a href="login.html" class="portal-logout-btn">Logout</a>
+        </div>
+    </header>
+
+    <!-- MAIN PORTAL CONTAINER -->
+    <main class="portal-container">
+
+        <!-- HEADER -->
+        <div class="portal-header">
+            <div class="portal-header-left">
+                <p class="eyebrow">INVENTORY, WAREHOUSE & LOGISTICS</p>
+                <h1>Supplier & Stock Management</h1>
+                <p>Monitor restaurant pantry inventory, fulfill kitchen supply purchase orders, and record deliveries.</p>
+            </div>
+            <div class="portal-header-right">
+                <div class="portal-time-badge">
+                    <span class="pulse-indicator"></span>
+                    <span id="vendor-live-clock">Warehouse Connected</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- STATS CARDS -->
+        <div class="portal-stats-grid">
+            <div class="portal-stat-card">
+                <div class="stat-icon">📦</div>
+                <div class="stat-label">Total Inventory SKUs</div>
+                <div class="stat-value" id="stat-total-skus">0</div>
+                <div class="stat-meta text-success" id="stat-stock-val">₹0 Total Value</div>
+            </div>
+
+            <div class="portal-stat-card">
+                <div class="stat-icon">📥</div>
+                <div class="stat-label">Pending Restock Orders</div>
+                <div class="stat-value" id="stat-pending-orders">0</div>
+                <div class="stat-meta text-danger" id="stat-urgent-requests">0 Urgent Requests</div>
+            </div>
+
+            <div class="portal-stat-card">
+                <div class="stat-icon">⚠️</div>
+                <div class="stat-label">Depleted / Low Stock</div>
+                <div class="stat-value" id="stat-low-stock-count">0</div>
+                <div class="stat-meta text-warning">Requires delivery</div>
+            </div>
+
+            <div class="portal-stat-card">
+                <div class="stat-icon">🚚</div>
+                <div class="stat-label">Fulfilled Deliveries</div>
+                <div class="stat-value" id="stat-fulfilled-deliveries">0</div>
+                <div class="stat-meta text-success">This month</div>
+            </div>
+        </div>
+
+        <!-- TAB NAVIGATION -->
+        <div class="portal-tabs-nav">
+            <button class="portal-tab-btn active" onclick="switchVendorTab('stock')">
+                <span>📋 Master Stock Report</span>
+                <span class="tab-badge" id="badge-vendor-skus">0</span>
+            </button>
+            <button class="portal-tab-btn" onclick="switchVendorTab('requests')">
+                <span>📥 Restock Purchase Orders</span>
+                <span class="tab-badge" id="badge-vendor-requests">0</span>
+            </button>
+            <button class="portal-tab-btn" onclick="switchVendorTab('deliveries')">
+                <span>🚚 Delivery Log & Invoices</span>
+            </button>
+        </div>
+
+        <!-- ================= TAB 1: MASTER STOCK REPORT (FEATURE #7) ================= -->
+        <section id="tab-stock" class="tab-pane active">
+            <div class="portal-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Restaurant Master Inventory Sheet</h2>
+                        <p>Complete status of all ingredients, units, supplier sources, and replenishment levels.</p>
+                    </div>
+                    <button class="btn-primary-action" onclick="openAddStockModal()">
+                        <span>+ Add New Stock Item</span>
+                    </button>
+                </div>
+
+                <!-- TOOLBAR -->
+                <div class="portal-toolbar">
+                    <div class="toolbar-search">
+                        <span>🔍</span>
+                        <input type="text" id="vendor-stock-search" placeholder="Search by ingredient, supplier or SKU..." oninput="filterVendorStock()">
+                    </div>
+
+                    <div class="toolbar-filters">
+                        <button class="filter-chip active" onclick="setVendorStockFilter('All', this)">All Items</button>
+                        <button class="filter-chip" onclick="setVendorStockFilter('Low Stock', this)">Low Stock</button>
+                        <button class="filter-chip" onclick="setVendorStockFilter('Out of Stock', this)">Out of Stock</button>
+                        <button class="filter-chip" onclick="setVendorStockFilter('Produce', this)">Produce</button>
+                        <button class="filter-chip" onclick="setVendorStockFilter('Dairy', this)">Dairy</button>
+                        <button class="filter-chip" onclick="setVendorStockFilter('Pantry', this)">Pantry</button>
+                        <button class="filter-chip" onclick="setVendorStockFilter('Dry Goods', this)">Dry Goods</button>
+                    </div>
+                </div>
+
+                <!-- STOCK TABLE -->
+                <div class="portal-table-container">
+                    <table class="portal-table">
+                        <thead>
+                            <tr>
+                                <th>SKU</th>
+                                <th>Item Name</th>
+                                <th>Category</th>
+                                <th>Quantity on Hand</th>
+                                <th>Min Threshold</th>
+                                <th>Unit Cost</th>
+                                <th>Status</th>
+                                <th>Primary Supplier</th>
+                                <th>Replenish Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vendor-stock-body">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 2: RESTOCK PURCHASE ORDERS ================= -->
+        <section id="tab-requests" class="tab-pane">
+            <div class="portal-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Incoming Restock Requests from Staff</h2>
+                        <p>Purchase requests dispatched by Head Chef, Restaurant Manager, and Owner.</p>
+                    </div>
+                </div>
+
+                <div class="portal-table-container">
+                    <table class="portal-table">
+                        <thead>
+                            <tr>
+                                <th>Order Ref</th>
+                                <th>Requested By</th>
+                                <th>Ingredient Item</th>
+                                <th>Quantity</th>
+                                <th>Date Requested</th>
+                                <th>Urgency</th>
+                                <th>Fulfillment Status</th>
+                                <th>Supplier Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vendor-requests-body">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 3: DELIVERY LOG & INVOICES ================= -->
+        <section id="tab-deliveries" class="tab-pane">
+            <div class="portal-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Supply Delivery Audit History</h2>
+                        <p>Track completed logistics shipments, delivery confirmations, and supplier slips.</p>
+                    </div>
+                </div>
+
+                <div class="portal-table-container">
+                    <table class="portal-table">
+                        <thead>
+                            <tr>
+                                <th>Delivery Batch</th>
+                                <th>Supplier</th>
+                                <th>Item Supplied</th>
+                                <th>Quantity Delivered</th>
+                                <th>Batch Value</th>
+                                <th>Date</th>
+                                <th>Delivery Note</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vendor-deliveries-body">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL: ADD NEW STOCK ITEM -->
+    <div class="modal-overlay" id="add-stock-modal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>Add New Inventory Supply</h3>
+                <button type="button" class="modal-close-btn" onclick="closeAddStockModal()">×</button>
+            </div>
+            <form id="add-stock-form" onsubmit="handleSaveNewStockItem(event)">
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="new-item-name">Item Name *</label>
+                            <input type="text" id="new-item-name" class="form-control" placeholder="e.g. Gorgonzola Dolce" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-item-category">Category *</label>
+                            <select id="new-item-category" class="form-control" required>
+                                <option value="Dairy">Dairy</option>
+                                <option value="Produce">Produce</option>
+                                <option value="Pantry">Pantry</option>
+                                <option value="Dry Goods">Dry Goods</option>
+                                <option value="Bakery">Bakery</option>
+                                <option value="Beverage">Beverage</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="new-item-quantity">Initial Stock Quantity *</label>
+                            <input type="number" id="new-item-quantity" class="form-control" placeholder="Quantity" min="0" step="0.5" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-item-unit">Unit of Measure *</label>
+                            <select id="new-item-unit" class="form-control" required>
+                                <option value="kg">kg (Kilograms)</option>
+                                <option value="L">L (Liters)</option>
+                                <option value="loaves">loaves (Units)</option>
+                                <option value="bottles">bottles</option>
+                                <option value="packs">packs</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="new-item-threshold">Minimum Threshold *</label>
+                            <input type="number" id="new-item-threshold" class="form-control" placeholder="Min required" min="1" step="0.5" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-item-cost">Unit Cost (₹) *</label>
+                            <input type="number" id="new-item-cost" class="form-control" placeholder="Unit cost" min="1" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="new-item-supplier">Supplier Organization *</label>
+                        <input type="text" id="new-item-supplier" class="form-control" placeholder="Supplier / Vendor name" value="Direct Agro Wholesale" required>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary-action" onclick="closeAddStockModal()">Cancel</button>
+                    <button type="submit" class="btn-primary-action">Add Item to Inventory</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: QUICK RESTOCK -->
+    <div class="modal-overlay" id="quick-restock-modal">
+        <div class="modal-box" style="max-width: 440px;">
+            <div class="modal-header">
+                <h3>Replenish Inventory</h3>
+                <button type="button" class="modal-close-btn" onclick="closeQuickRestockModal()">×</button>
+            </div>
+            <form id="quick-restock-form" onsubmit="handleConfirmQuickRestock(event)">
+                <input type="hidden" id="restock-item-id" value="">
+                <div class="modal-body">
+                    <p style="font-size: 14px; color: #756d62; margin-bottom: 12px;">
+                        Add received shipment delivery for: <strong id="restock-item-name" style="color: #2d2822;">Item</strong>
+                    </p>
+
+                    <div class="form-group">
+                        <label for="restock-add-qty">Delivered Quantity to Add (<span id="restock-unit-label">kg</span>) *</label>
+                        <input type="number" id="restock-add-qty" class="form-control" min="0.5" step="0.5" value="10" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="restock-batch-note">Batch / Supplier Delivery Ref</label>
+                        <input type="text" id="restock-batch-note" class="form-control" placeholder="e.g. Batch #LT-9418 / Delivery Challan 104">
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary-action" onclick="closeQuickRestockModal()">Cancel</button>
+                    <button type="submit" class="btn-primary-action">Confirm Delivery & Update Stock</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: DELIVERY RECEIPT -->
+    <div class="modal-overlay" id="delivery-note-modal">
+        <div class="modal-box" style="max-width: 460px;">
+            <div class="modal-header">
+                <h3>Delivery Challan Note</h3>
+                <button type="button" class="modal-close-btn" onclick="closeDeliveryNoteModal()">×</button>
+            </div>
+            <div class="modal-body" id="delivery-note-content"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary-action" onclick="closeDeliveryNoteModal()">Close</button>
+                <button type="button" class="btn-primary-action" onclick="window.print()">🖨 Print Delivery Note</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- SCRIPTS -->
+    <script src="js/app-data.js"></script>
+    <script>
+        let currentVendorStockFilter = 'All';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            refreshVendorView();
+            updateLiveClock();
+            setInterval(updateLiveClock, 30000);
+        });
+
+        function updateLiveClock() {
+            const now = new Date();
+            document.getElementById('vendor-live-clock').textContent = `Supplier Log · ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+        }
+
+        function toggleRoleDropdown() {
+            document.getElementById('role-menu').classList.toggle('show');
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.closest('.role-switcher-dropdown')) {
+                const dropdowns = document.getElementsByClassName("role-dropdown-menu");
+                for (let i = 0; i < dropdowns.length; i++) {
+                    dropdowns[i].classList.remove('show');
+                }
+            }
+        };
+
+        function switchVendorTab(tabId) {
+            document.querySelectorAll('.portal-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+
+            const activeBtn = Array.from(document.querySelectorAll('.portal-tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+            if (activeBtn) activeBtn.classList.add('active');
+
+            const target = document.getElementById('tab-' + tabId);
+            if (target) target.classList.add('active');
+
+            if (tabId === 'stock') renderVendorStock();
+            if (tabId === 'requests') renderVendorRequests();
+            if (tabId === 'deliveries') renderDeliveryLog();
+            refreshVendorStats();
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type === 'success' ? 'toast-success' : type === 'danger' ? 'toast-danger' : ''}`;
+            toast.innerHTML = `<span>${type === 'success' ? '✓' : type === 'danger' ? '✕' : '✦'}</span> <div>${message}</div>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        function refreshVendorStats() {
+            const stock = RAS.getStock();
+            const requests = RAS.getStockRequests();
+
+            document.getElementById('stat-total-skus').textContent = stock.length;
+            const totalVal = stock.reduce((acc, s) => acc + (s.quantity * s.unitCost), 0);
+            document.getElementById('stat-stock-val').textContent = `${RAS.formatCurrency(totalVal)} Total Value`;
+
+            const pendingReqs = requests.filter(r => r.status === 'Pending' || r.status === 'Dispatched');
+            document.getElementById('stat-pending-orders').textContent = pendingReqs.length;
+            const urgentReqs = requests.filter(r => r.urgency === 'Urgent' && r.status !== 'Delivered').length;
+            document.getElementById('stat-urgent-requests').textContent = `${urgentReqs} Urgent Requests`;
+
+            const lowStock = stock.filter(s => s.status !== 'In Stock').length;
+            document.getElementById('stat-low-stock-count').textContent = lowStock;
+
+            const fulfilledReqs = requests.filter(r => r.status === 'Delivered').length;
+            document.getElementById('stat-fulfilled-deliveries').textContent = fulfilledReqs + 4; // Including historical seed shipments
+
+            document.getElementById('badge-vendor-skus').textContent = stock.length;
+            document.getElementById('badge-vendor-requests').textContent = pendingReqs.length;
+        }
+
+        function refreshVendorView() {
+            renderVendorStock();
+            renderVendorRequests();
+            renderDeliveryLog();
+            refreshVendorStats();
+        }
+
+        /* 1. MASTER STOCK REPORT */
+        function renderVendorStock() {
+            const stock = RAS.getStock();
+            const tbody = document.getElementById('vendor-stock-body');
+            const searchVal = (document.getElementById('vendor-stock-search').value || '').toLowerCase();
+            tbody.innerHTML = '';
+
+            const filtered = stock.filter(item => {
+                let matchFilter = true;
+                if (currentVendorStockFilter === 'Low Stock') matchFilter = item.status === 'Low Stock';
+                else if (currentVendorStockFilter === 'Out of Stock') matchFilter = item.status === 'Out of Stock';
+                else if (currentVendorStockFilter !== 'All') matchFilter = item.category === currentVendorStockFilter;
+
+                const matchSearch = item.name.toLowerCase().includes(searchVal) ||
+                                    item.supplier.toLowerCase().includes(searchVal) ||
+                                    item.id.toLowerCase().includes(searchVal);
+                return matchFilter && matchSearch;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #756d62; padding: 30px;">No inventory records match filter.</td></tr>';
+                return;
+            }
+
+            filtered.forEach(item => {
+                const badgeClass = item.status === 'In Stock' ? 'badge-in-stock' : item.status === 'Low Stock' ? 'badge-low-stock' : 'badge-out-of-stock';
+                tbody.innerHTML += `
+                    <tr>
+                        <td><code>${item.id}</code></td>
+                        <td><strong>${item.name}</strong></td>
+                        <td><span style="font-size: 12px; background: #faf3eb; padding: 2px 8px; border-radius: 4px;">${item.category}</span></td>
+                        <td><strong>${item.quantity} ${item.unit}</strong></td>
+                        <td style="color: #756d62;">${item.minThreshold} ${item.unit}</td>
+                        <td>₹${item.unitCost}/${item.unit}</td>
+                        <td><span class="status-badge ${badgeClass}">${item.status}</span></td>
+                        <td style="color: #625b52;">${item.supplier}</td>
+                        <td>
+                            <button class="btn-primary-action" style="padding: 6px 12px; font-size: 12px;" onclick="openQuickRestockModal('${item.id}', '${item.name}', '${item.unit}')">
+                                + Restock
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function setVendorStockFilter(filter, buttonEl) {
+            currentVendorStockFilter = filter;
+            document.querySelectorAll('#tab-stock .filter-chip').forEach(btn => btn.classList.remove('active'));
+            buttonEl.classList.add('active');
+            renderVendorStock();
+        }
+
+        function filterVendorStock() {
+            renderVendorStock();
+        }
+
+        function openAddStockModal() {
+            document.getElementById('add-stock-form').reset();
+            document.getElementById('add-stock-modal').classList.add('active');
+        }
+
+        function closeAddStockModal() {
+            document.getElementById('add-stock-modal').classList.remove('active');
+        }
+
+        function handleSaveNewStockItem(e) {
+            e.preventDefault();
+            const item = {
+                name: document.getElementById('new-item-name').value.trim(),
+                category: document.getElementById('new-item-category').value,
+                quantity: parseFloat(document.getElementById('new-item-quantity').value),
+                unit: document.getElementById('new-item-unit').value,
+                minThreshold: parseFloat(document.getElementById('new-item-threshold').value),
+                unitCost: parseFloat(document.getElementById('new-item-cost').value),
+                supplier: document.getElementById('new-item-supplier').value.trim()
+            };
+
+            const created = RAS.addStockItem(item);
+            closeAddStockModal();
+            showToast(`Added new stock item "${created.name}"!`, 'success');
+            refreshVendorView();
+        }
+
+        function openQuickRestockModal(id, name, unit) {
+            document.getElementById('restock-item-id').value = id;
+            document.getElementById('restock-item-name').textContent = name;
+            document.getElementById('restock-unit-label').textContent = unit;
+            document.getElementById('restock-add-qty').value = 10;
+            document.getElementById('restock-batch-note').value = 'Delivery Batch #' + Math.floor(1000 + Math.random() * 9000);
+            document.getElementById('quick-restock-modal').classList.add('active');
+        }
+
+        function closeQuickRestockModal() {
+            document.getElementById('quick-restock-modal').classList.remove('active');
+        }
+
+        function handleConfirmQuickRestock(e) {
+            e.preventDefault();
+            const id = document.getElementById('restock-item-id').value;
+            const addedQty = parseFloat(document.getElementById('restock-add-qty').value);
+            const batch = document.getElementById('restock-batch-note').value;
+
+            const updated = RAS.restockItem(id, addedQty);
+            if (updated) {
+                closeQuickRestockModal();
+                showToast(`Restocked ${addedQty} ${updated.unit} of "${updated.name}"!`, 'success');
+                refreshVendorView();
+            }
+        }
+
+        /* 2. INCOMING PURCHASE ORDERS */
+        function renderVendorRequests() {
+            const requests = RAS.getStockRequests();
+            const tbody = document.getElementById('vendor-requests-body');
+            tbody.innerHTML = '';
+
+            if (requests.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #756d62; padding: 30px;">No restock purchase orders found.</td></tr>';
+                return;
+            }
+
+            requests.forEach(req => {
+                let badgeClass = 'badge-pending';
+                if (req.status === 'Dispatched') badgeClass = 'badge-dispatched';
+                if (req.status === 'Delivered') badgeClass = 'badge-delivered';
+
+                let actionHtml = '';
+                if (req.status === 'Pending') {
+                    actionHtml = `
+                        <div style="display:flex; gap: 6px;">
+                            <button class="btn-icon-action" onclick="updateVendorRequest('${req.id}', 'Dispatched')">Dispatch</button>
+                            <button class="btn-primary-action" style="padding: 5px 10px; font-size: 11px;" onclick="updateVendorRequest('${req.id}', 'Delivered')">Deliver Now</button>
+                        </div>
+                    `;
+                } else if (req.status === 'Dispatched') {
+                    actionHtml = `
+                        <button class="btn-primary-action" style="padding: 5px 10px; font-size: 11px;" onclick="updateVendorRequest('${req.id}', 'Delivered')">Mark Delivered</button>
+                    `;
+                } else {
+                    actionHtml = `<span style="font-size: 12px; color: #2e7d32;">✓ Stock Replenished</span>`;
+                }
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${req.id}</strong></td>
+                        <td>${req.requestedBy}</td>
+                        <td><strong>${req.itemName}</strong><br><small style="color:#756d62;">${req.notes || ''}</small></td>
+                        <td><strong>${req.quantity} ${req.unit}</strong></td>
+                        <td>${req.date}</td>
+                        <td>
+                            <span class="status-badge ${req.urgency === 'Urgent' ? 'badge-urgent' : 'badge-low-stock'}">
+                                ${req.urgency}
+                            </span>
+                        </td>
+                        <td><span class="status-badge ${badgeClass}">${req.status}</span></td>
+                        <td>${actionHtml}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function updateVendorRequest(reqId, newStatus) {
+            const updated = RAS.updateStockRequestStatus(reqId, newStatus);
+            if (updated) {
+                if (newStatus === 'Delivered') {
+                    showToast(`Request #${reqId} delivered! Inventory was automatically updated.`, 'success');
+                } else {
+                    showToast(`Request #${reqId} marked as ${newStatus}.`, 'info');
+                }
+                refreshVendorView();
+            }
+        }
+
+        /* 3. DELIVERY LOG */
+        function renderDeliveryLog() {
+            const stock = RAS.getStock();
+            const tbody = document.getElementById('vendor-deliveries-body');
+            tbody.innerHTML = '';
+
+            const deliveries = [
+                { batch: 'DEL-2026-88', supplier: 'Lombardy Creamery', item: 'Fresh Fior di Latte Mozzarella', qty: '15 kg', val: 5700, date: 'Today, 10:45 AM' },
+                { batch: 'DEL-2026-87', supplier: 'Verona Agro Supply', item: 'San Marzano Tomatoes', qty: '40 kg', val: 4400, date: 'Yesterday, 04:30 PM' },
+                { batch: 'DEL-2026-86', supplier: 'Umbria Fine Foods', item: 'Black Truffle Oil', qty: '4 L', val: 5800, date: '22 Sep 2026' },
+                { batch: 'DEL-2026-85', supplier: 'Caputo Mills', item: 'Italian Tipo 00 Flour', qty: '60 kg', val: 5700, date: '20 Sep 2026' }
+            ];
+
+            deliveries.forEach(del => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${del.batch}</strong></td>
+                        <td>${del.supplier}</td>
+                        <td>${del.item}</td>
+                        <td><strong>${del.qty}</strong></td>
+                        <td>${RAS.formatCurrency(del.val)}</td>
+                        <td>${del.date}</td>
+                        <td>
+                            <button class="btn-icon-action" onclick="viewDeliveryChallan('${del.batch}', '${del.supplier}', '${del.item}', '${del.qty}', '${del.val}', '${del.date}')">
+                                📄 View Note
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function viewDeliveryChallan(batch, supplier, item, qty, val, date) {
+            document.getElementById('delivery-note-content').innerHTML = `
+                <div class="receipt-sheet printable-area">
+                    <div class="receipt-header">
+                        <h2>SUPPLY DELIVERY CHALLAN</h2>
+                        <p>Authorized Logistics Dispatch Note</p>
+                        <p>Recipient: La Tavola Restaurant, Park Street, Kolkata</p>
+                    </div>
+
+                    <div class="receipt-meta">
+                        <div style="display:flex; justify-content:space-between;">
+                            <span><strong>CHALLAN NO:</strong> ${batch}</span>
+                            <span><strong>DATE:</strong> ${date}</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-top: 4px;">
+                            <span><strong>SUPPLIER:</strong> ${supplier}</span>
+                            <span><strong>STATUS:</strong> Delivered & Accepted</span>
+                        </div>
+                    </div>
+
+                    <table class="receipt-table">
+                        <thead>
+                            <tr><th>Item Description</th><th style="text-align:center;">Delivered</th><th style="text-align:right;">Value</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>${item}</td>
+                                <td style="text-align:center;">${qty}</td>
+                                <td style="text-align:right;">${RAS.formatCurrency(val)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div style="margin-top: 25px; padding-top: 15px; border-top: 1px dashed #ccc; font-size: 12px; display: flex; justify-content: space-between;">
+                        <div>
+                            <p><strong>Dispatched By:</strong></p>
+                            <p style="margin-top: 20px;">Vendor Logistics Lead</p>
+                        </div>
+                        <div>
+                            <p><strong>Received At Restaurant By:</strong></p>
+                            <p style="margin-top: 20px;">Kitchen Receiving Chef</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('delivery-note-modal').classList.add('active');
+        }
+
+        function closeDeliveryNoteModal() {
+            document.getElementById('delivery-note-modal').classList.remove('active');
+        }
+    </script>
+</body>
+
+</html>

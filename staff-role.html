@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Staff Access | La Tavola</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="logo">
+            LA TAVOLA
+            <span>RESTAURANT</span>
+        </div>
+
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="login.html">Login</a>
+        </div>
+    </nav>
+
+
+    <!-- STAFF ROLE PAGE -->
+    <main class="staff-role-page">
+
+        <div class="staff-role-header">
+            <p class="section-label">STAFF ACCESS</p>
+            <h1>Choose your role.</h1>
+            <p>Select your operational role and authenticate with your phone number and password.</p>
+        </div>
+
+
+        <!-- ROLE CARDS -->
+        <div class="staff-role-grid">
+
+            <!-- OWNER -->
+            <a href="javascript:void(0)" onclick="openRoleAuthModal('Owner')" class="staff-role-card">
+                <div class="staff-role-number">01</div>
+                <div class="staff-role-icon">♜</div>
+                <h2>Owner</h2>
+                <p>Manage the menu, generate bills, and review restaurant stock.</p>
+                <span class="staff-role-arrow">→</span>
+            </a>
+
+            <!-- MANAGER -->
+            <a href="javascript:void(0)" onclick="openRoleAuthModal('Manager')" class="staff-role-card">
+                <div class="staff-role-number">02</div>
+                <div class="staff-role-icon">◫</div>
+                <h2>Manager</h2>
+                <p>Track orders, generate table bills, process payments and stock.</p>
+                <span class="staff-role-arrow">→</span>
+            </a>
+
+            <!-- CHEF -->
+            <a href="javascript:void(0)" onclick="openRoleAuthModal('Chef')" class="staff-role-card">
+                <div class="staff-role-number">03</div>
+                <div class="staff-role-icon">♨</div>
+                <h2>Chef</h2>
+                <p>Accept/reject orders, track kitchen cooking, and report supplies.</p>
+                <span class="staff-role-arrow">→</span>
+            </a>
+
+            <!-- VENDOR -->
+            <a href="javascript:void(0)" onclick="openRoleAuthModal('Vendor')" class="staff-role-card">
+                <div class="staff-role-number">04</div>
+                <div class="staff-role-icon">◈</div>
+                <h2>Vendor</h2>
+                <p>Manage warehouse inventory, fulfill restock orders & deliveries.</p>
+                <span class="staff-role-arrow">→</span>
+            </a>
+
+        </div>
+
+
+        <div class="staff-role-back">
+            <a href="login.html">← Back to Login</a>
+        </div>
+
+    </main>
+
+    <!-- MODAL: ROLE AUTHENTICATION -->
+    <div class="modal-overlay" id="role-auth-modal">
+        <div class="modal-box" style="max-width: 460px;">
+            <div class="modal-header">
+                <h3 id="modal-role-title">Staff Authentication</h3>
+                <button type="button" class="modal-close-btn" onclick="closeRoleAuthModal()">×</button>
+            </div>
+            <form id="role-auth-form" onsubmit="handleRoleModalSubmit(event)">
+                <input type="hidden" id="auth-target-role" value="Owner">
+
+                <div class="modal-body">
+                    <p style="font-size: 14px; color: #756d62; margin-bottom: 16px;">
+                        Enter your registered phone number and security password to access the <strong id="auth-role-name" style="color: #a85d45;">Owner</strong> portal.
+                    </p>
+
+                    <div id="modal-auth-alert" class="login-alert-banner"></div>
+
+                    <!-- PHONE NUMBER -->
+                    <div class="login-field-group">
+                        <label for="modal-phone" class="login-field-label">Staff Phone Number</label>
+                        <div class="phone-field-wrapper">
+                            <div class="country-code-pill">
+                                <span>🇮🇳</span>
+                                <span>+91</span>
+                            </div>
+                            <input type="tel" id="modal-phone" class="phone-text-input" placeholder="10-digit mobile number" maxlength="10" required>
+                        </div>
+                    </div>
+
+                    <!-- PASSWORD -->
+                    <div class="login-field-group">
+                        <label for="modal-password" class="login-field-label">Password / PIN</label>
+                        <div class="password-field-wrapper">
+                            <input type="password" id="modal-password" class="password-text-input" placeholder="Staff security password" required>
+                            <button type="button" class="password-reveal-btn" onclick="toggleModalPassword(this)" title="Toggle Password">👁️</button>
+                        </div>
+                    </div>
+
+                    <!-- DEMO HINT -->
+                    <div class="login-demo-box">
+                        <strong>Demo Credentials:</strong>
+                        <span id="modal-demo-text">Phone: <code>9830011223</code> · Pass: <code>owner123</code></span><br>
+                        <button type="button" class="demo-fill-btn" onclick="fillRoleDemo()">⚡ Auto-fill for This Role</button>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary-action" onclick="closeRoleAuthModal()">Cancel</button>
+                    <button type="submit" class="btn-primary-action" id="modal-auth-btn">Authenticate & Enter →</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div>
+            <strong>LA TAVOLA</strong>
+            <p>A taste worth remembering.</p>
+        </div>
+        <div>
+            <p>Kolkata, West Bengal</p>
+            <p>Open daily · 11:00 AM – 11:00 PM</p>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script src="js/app-data.js"></script>
+    <script>
+        let currentAuthRole = 'Owner';
+
+        const ROLE_MAP = {
+            'Owner': { page: 'owner.html', icon: '♜', phone: '9830011223', pass: 'owner123' },
+            'Manager': { page: 'manager.html', icon: '◫', phone: '9830022334', pass: 'manager123' },
+            'Chef': { page: 'chef.html', icon: '♨', phone: '9830033445', pass: 'chef123' },
+            'Vendor': { page: 'vendor.html', icon: '◈', phone: '9830044556', pass: 'vendor123' }
+        };
+
+        function openRoleAuthModal(role) {
+            currentAuthRole = role;
+            const roleInfo = ROLE_MAP[role] || ROLE_MAP['Owner'];
+
+            document.getElementById('auth-target-role').value = role;
+            document.getElementById('modal-role-title').textContent = `${roleInfo.icon} ${role} Authentication`;
+            document.getElementById('auth-role-name').textContent = role;
+            document.getElementById('modal-demo-text').innerHTML = `Phone: <code>${roleInfo.phone}</code> · Pass: <code>${roleInfo.pass}</code>`;
+
+            document.getElementById('modal-phone').value = '';
+            document.getElementById('modal-password').value = '';
+            hideModalAlert();
+
+            document.getElementById('role-auth-modal').classList.add('active');
+        }
+
+        function closeRoleAuthModal() {
+            document.getElementById('role-auth-modal').classList.remove('active');
+        }
+
+        function toggleModalPassword(btn) {
+            const input = document.getElementById('modal-password');
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.textContent = '🔒';
+            } else {
+                input.type = 'password';
+                btn.textContent = '👁️';
+            }
+        }
+
+        function fillRoleDemo() {
+            const roleInfo = ROLE_MAP[currentAuthRole];
+            document.getElementById('modal-phone').value = roleInfo.phone;
+            document.getElementById('modal-password').value = roleInfo.pass;
+            hideModalAlert();
+        }
+
+        function showModalAlert(msg, isError = true) {
+            const alertBox = document.getElementById('modal-auth-alert');
+            alertBox.className = `login-alert-banner ${isError ? 'error' : 'success'}`;
+            alertBox.innerHTML = `<span>${isError ? '✕' : '✓'}</span> <div>${msg}</div>`;
+        }
+
+        function hideModalAlert() {
+            document.getElementById('modal-auth-alert').style.display = 'none';
+        }
+
+        function handleRoleModalSubmit(e) {
+            e.preventDefault();
+            const role = document.getElementById('auth-target-role').value;
+            const phone = document.getElementById('modal-phone').value.trim();
+            const pass = document.getElementById('modal-password').value;
+
+            if (window.RAS) {
+                const res = RAS.authenticateStaff(role, phone, pass);
+                if (res.success) {
+                    showModalAlert(`Verified as ${role}! Entering portal...`, false);
+                    document.getElementById('modal-auth-btn').disabled = true;
+                    setTimeout(() => {
+                        window.location.href = res.redirect;
+                    }, 500);
+                } else {
+                    showModalAlert(res.message, true);
+                }
+            } else {
+                const roleInfo = ROLE_MAP[role];
+                window.location.href = roleInfo ? roleInfo.page : 'staff-role.html';
+            }
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chef Kitchen Display | La Tavola</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="staff-portal-page">
+
+    <!-- NAVBAR -->
+    <header class="staff-portal-navbar">
+        <div class="portal-brand">
+            <a href="index.html" class="logo">
+                <span>LA TAVOLA</span>
+                <small>RESTAURANT</small>
+            </a>
+            <span class="portal-role-badge badge-chef">♨ Chef Kitchen Display (KDS)</span>
+        </div>
+
+        <div class="portal-nav-actions">
+            <a href="index.html" class="portal-nav-link">Website</a>
+
+            <div class="role-switcher-dropdown">
+                <button type="button" class="role-switcher-btn" onclick="toggleRoleDropdown()">
+                    <span>Switch Role</span>
+                    <small>▾</small>
+                </button>
+                <div class="role-dropdown-menu" id="role-menu">
+                    <a href="staff-role.html">Role Directory</a>
+                    <a href="owner.html">Owner Portal</a>
+                    <a href="manager.html">Manager Portal</a>
+                    <a href="vendor.html">Vendor Inventory</a>
+                    <a href="customer.html">Customer View</a>
+                </div>
+            </div>
+
+            <a href="login.html" class="portal-logout-btn">Logout</a>
+        </div>
+    </header>
+
+    <!-- MAIN PORTAL CONTAINER -->
+    <main class="portal-container">
+
+        <!-- HEADER -->
+        <div class="portal-header">
+            <div class="portal-header-left">
+                <p class="eyebrow">HEAD CHEF & KITCHEN STATIONS</p>
+                <h1>Kitchen Display System</h1>
+                <p>Accept or reject incoming table orders, manage active cooking timers, and report ingredient supplies.</p>
+            </div>
+            <div class="portal-header-right">
+                <div class="portal-time-badge">
+                    <span class="pulse-indicator"></span>
+                    <span id="chef-live-clock">Kitchen Live</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- STATS CARDS -->
+        <div class="portal-stats-grid">
+            <div class="portal-stat-card">
+                <div class="stat-icon">🔔</div>
+                <div class="stat-label">Pending Approval</div>
+                <div class="stat-value" id="stat-pending-accept">0</div>
+                <div class="stat-meta text-warning">Requires Accept / Reject</div>
+            </div>
+
+            <div class="portal-stat-card">
+                <div class="stat-icon">🍳</div>
+                <div class="stat-label">Currently Cooking</div>
+                <div class="stat-value" id="stat-cooking-count">0</div>
+                <div class="stat-meta" id="stat-cooking-sub">On active burners</div>
+            </div>
+
+            <div class="portal-stat-card">
+                <div class="stat-icon">🍽</div>
+                <div class="stat-label">Ready for Pickup</div>
+                <div class="stat-value" id="stat-ready-count">0</div>
+                <div class="stat-meta text-success">Plated on pass counter</div>
+            </div>
+
+            <div class="portal-stat-card">
+                <div class="stat-icon">⚠️</div>
+                <div class="stat-label">Kitchen Ingredients</div>
+                <div class="stat-value" id="stat-depleted-stock">0</div>
+                <div class="stat-meta text-danger">Low / Out of stock</div>
+            </div>
+        </div>
+
+        <!-- TAB NAVIGATION -->
+        <div class="portal-tabs-nav">
+            <button class="portal-tab-btn active" onclick="switchChefTab('accept-reject')">
+                <span>🛎 Order Accept / Reject</span>
+                <span class="tab-badge" id="badge-incoming-count">0</span>
+            </button>
+            <button class="portal-tab-btn" onclick="switchChefTab('pipeline')">
+                <span>⏱ Track Orders (Kitchen Flow)</span>
+                <span class="tab-badge" id="badge-pipeline-count">0</span>
+            </button>
+            <button class="portal-tab-btn" onclick="switchChefTab('stock')">
+                <span>🥕 Kitchen Stock Report</span>
+                <span class="tab-badge" id="badge-chef-stock">0</span>
+            </button>
+        </div>
+
+        <!-- ================= TAB 1: ORDER ACCEPT / REJECT (FEATURE #4) ================= -->
+        <section id="tab-accept-reject" class="tab-pane active">
+            <!-- INCOMING NOTIFICATION BANNER -->
+            <div class="kds-incoming-banner">
+                <div class="incoming-banner-info">
+                    <span class="incoming-icon">👨‍🍳</span>
+                    <div>
+                        <h3 id="incoming-banner-title">Incoming Order Queue</h3>
+                        <p id="incoming-banner-desc">Review new orders placed by dining guests and mobile apps. Accept to start cooking or Reject if unavailable.</p>
+                    </div>
+                </div>
+                <button class="btn-primary-action" onclick="refreshChefOrders()">↻ Check New Orders</button>
+            </div>
+
+            <div class="portal-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Orders Awaiting Kitchen Decision</h2>
+                        <p>Immediate action required to notify waitstaff and customers.</p>
+                    </div>
+                </div>
+
+                <div class="kds-grid" id="incoming-orders-grid">
+                    <!-- Populated dynamically with Accept / Reject tickets -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 2: TRACK ORDER / KITCHEN PIPELINE (FEATURE #6) ================= -->
+        <section id="tab-pipeline" class="tab-pane">
+            <div class="portal-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Kitchen Production Pipeline</h2>
+                        <p>Track orders moving from cooking burners to plating and waiter pickup.</p>
+                    </div>
+                    <!-- Station filter -->
+                    <div class="toolbar-filters">
+                        <button class="filter-chip active" onclick="setKitchenStationFilter('All', this)">All Stations</button>
+                        <button class="filter-chip" onclick="setKitchenStationFilter('Mains', this)">Pasta & Mains</button>
+                        <button class="filter-chip" onclick="setKitchenStationFilter('Pizza', this)">Pizza Station</button>
+                        <button class="filter-chip" onclick="setKitchenStationFilter('Starters', this)">Starters / Salads</button>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                    <!-- COLUMN 1: IN PREPARATION / COOKING -->
+                    <div style="background: #fbf8f3; border: 1px solid #ede5db; border-radius: 16px; padding: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 2px solid #a65f42; padding-bottom: 10px;">
+                            <h3 style="font-family: 'Playfair Display', serif; font-size: 20px; color: #a65f42; margin: 0;">
+                                🔥 In Cooking / Preparation
+                            </h3>
+                            <span class="tab-badge" id="badge-cooking-col">0</span>
+                        </div>
+                        <div id="cooking-tickets-container" style="display: flex; flex-direction: column; gap: 16px;">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- COLUMN 2: PLATED & READY TO SERVE -->
+                    <div style="background: #fbf8f3; border: 1px solid #ede5db; border-radius: 16px; padding: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 2px solid #2e7d32; padding-bottom: 10px;">
+                            <h3 style="font-family: 'Playfair Display', serif; font-size: 20px; color: #2e7d32; margin: 0;">
+                                🍽 Plated & Ready to Serve
+                            </h3>
+                            <span class="tab-badge" style="background: #2e7d32;" id="badge-ready-col">0</span>
+                        </div>
+                        <div id="ready-tickets-container" style="display: flex; flex-direction: column; gap: 16px;">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 3: KITCHEN STOCK REPORT (FEATURE #7) ================= -->
+        <section id="tab-stock" class="tab-pane">
+            <div class="portal-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Kitchen Raw Ingredients & Pantry Stock</h2>
+                        <p>Monitor essential culinary supplies and flag low or exhausted items to prevent order delays.</p>
+                    </div>
+                    <button class="btn-primary-action" onclick="openEmergencyRestockModal()">
+                        <span>🚨 Request Urgent Ingredient</span>
+                    </button>
+                </div>
+
+                <div class="portal-table-container">
+                    <table class="portal-table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Category</th>
+                                <th>Quantity Available</th>
+                                <th>Min Required</th>
+                                <th>Status</th>
+                                <th>Chef Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="chef-stock-body">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL: REJECT ORDER WITH REASON -->
+    <div class="modal-overlay" id="reject-modal">
+        <div class="modal-box">
+            <div class="modal-header" style="background: #ffebee;">
+                <h3 style="color: #c62828;">Reject Order</h3>
+                <button type="button" class="modal-close-btn" onclick="closeRejectModal()">×</button>
+            </div>
+            <form id="reject-form" onsubmit="handleConfirmReject(event)">
+                <input type="hidden" id="reject-order-number" value="">
+                <div class="modal-body">
+                    <p style="font-size: 14px; color: #756d62; margin-bottom: 15px;">
+                        Please provide a specific reason for rejecting <strong id="reject-order-label">Order</strong>. This reason will be logged for the Manager and Dining Guest.
+                    </p>
+
+                    <div class="form-group">
+                        <label for="reject-reason-select">Select Reason *</label>
+                        <select id="reject-reason-select" class="form-control" required onchange="handleRejectReasonChange(this.value)">
+                            <option value="Key ingredient out of stock">Key ingredient out of stock</option>
+                            <option value="Kitchen at maximum capacity / peak overload">Kitchen at maximum capacity / peak overload</option>
+                            <option value="Station equipment maintenance">Station equipment maintenance</option>
+                            <option value="Special request cannot be accommodated">Special request cannot be accommodated</option>
+                            <option value="Other custom reason">Other custom reason...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="reject-custom-group" style="display: none;">
+                        <label for="reject-custom-text">Custom Explanation</label>
+                        <textarea id="reject-custom-text" class="form-control" rows="2" placeholder="Specify why the order is rejected..."></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary-action" onclick="closeRejectModal()">Cancel</button>
+                    <button type="submit" class="btn-kitchen-reject" style="flex: none; padding: 10px 20px;">Confirm Rejection</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: EMERGENCY INGREDIENT RESTOCK -->
+    <div class="modal-overlay" id="emergency-stock-modal">
+        <div class="modal-box">
+            <div class="modal-header" style="background: #fff8e1;">
+                <h3 style="color: #b56214;">Request Urgent Kitchen Ingredient</h3>
+                <button type="button" class="modal-close-btn" onclick="closeEmergencyRestockModal()">×</button>
+            </div>
+            <form id="emergency-stock-form" onsubmit="handleSendEmergencyStock(event)">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="emergency-item-select">Ingredient *</label>
+                        <select id="emergency-item-select" class="form-control" required>
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="emergency-qty">Quantity Needed *</label>
+                            <input type="number" id="emergency-qty" class="form-control" placeholder="Qty" min="1" step="0.5" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="emergency-urgency">Urgency</label>
+                            <input type="text" id="emergency-urgency" class="form-control" value="Urgent (Today)" readonly>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="emergency-notes">Kitchen Notes</label>
+                        <textarea id="emergency-notes" class="form-control" rows="2" placeholder="e.g. Mascarpone depleted during lunch prep, need urgently for dinner dessert orders."></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary-action" onclick="closeEmergencyRestockModal()">Cancel</button>
+                    <button type="submit" class="btn-primary-action">Dispatch Urgent Request to Vendor</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- SCRIPTS -->
+    <script src="js/app-data.js"></script>
+    <script>
+        let currentStationFilter = 'All';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            refreshChefView();
+            updateLiveClock();
+            setInterval(updateLiveClock, 30000);
+        });
+
+        function updateLiveClock() {
+            const now = new Date();
+            document.getElementById('chef-live-clock').textContent = `Kitchen Active · ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+        }
+
+        function toggleRoleDropdown() {
+            document.getElementById('role-menu').classList.toggle('show');
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.closest('.role-switcher-dropdown')) {
+                const dropdowns = document.getElementsByClassName("role-dropdown-menu");
+                for (let i = 0; i < dropdowns.length; i++) {
+                    dropdowns[i].classList.remove('show');
+                }
+            }
+        };
+
+        function switchChefTab(tabId) {
+            document.querySelectorAll('.portal-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+
+            const activeBtn = Array.from(document.querySelectorAll('.portal-tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+            if (activeBtn) activeBtn.classList.add('active');
+
+            const target = document.getElementById('tab-' + tabId);
+            if (target) target.classList.add('active');
+
+            if (tabId === 'accept-reject') renderIncomingOrders();
+            if (tabId === 'pipeline') renderKitchenPipeline();
+            if (tabId === 'stock') renderChefStock();
+            refreshChefStats();
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type === 'success' ? 'toast-success' : type === 'danger' ? 'toast-danger' : ''}`;
+            toast.innerHTML = `<span>${type === 'success' ? '✓' : type === 'danger' ? '✕' : '✦'}</span> <div>${message}</div>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        function refreshChefStats() {
+            const orders = RAS.getOrders();
+            const stock = RAS.getStock();
+
+            const pending = orders.filter(o => o.status === 'Pending');
+            const cooking = orders.filter(o => o.status === 'Preparing');
+            const ready = orders.filter(o => o.status === 'Ready');
+            const lowStock = stock.filter(s => s.status !== 'In Stock');
+
+            document.getElementById('stat-pending-accept').textContent = pending.length;
+            document.getElementById('stat-cooking-count').textContent = cooking.length;
+            document.getElementById('stat-ready-count').textContent = ready.length;
+            document.getElementById('stat-depleted-stock').textContent = lowStock.length;
+
+            document.getElementById('badge-incoming-count').textContent = pending.length;
+            document.getElementById('badge-pipeline-count').textContent = cooking.length + ready.length;
+            document.getElementById('badge-chef-stock').textContent = lowStock.length;
+
+            if (pending.length > 0) {
+                document.getElementById('incoming-banner-title').textContent = `${pending.length} Incoming Order${pending.length > 1 ? 's' : ''} Pending Action!`;
+                document.getElementById('incoming-banner-desc').textContent = 'Please review and accept orders promptly to maintain standard kitchen prep times.';
+            } else {
+                document.getElementById('incoming-banner-title').textContent = 'Kitchen Queue Clear';
+                document.getElementById('incoming-banner-desc').textContent = 'All incoming orders have been reviewed. Ready for new orders!';
+            }
+        }
+
+        function refreshChefView() {
+            renderIncomingOrders();
+            renderKitchenPipeline();
+            renderChefStock();
+            refreshChefStats();
+        }
+
+        function refreshChefOrders() {
+            refreshChefView();
+            showToast('Kitchen orders synced.', 'info');
+        }
+
+        /* 1. ORDER ACCEPT / REJECT */
+        function renderIncomingOrders() {
+            const orders = RAS.getOrders();
+            const pendingOrders = orders.filter(o => o.status === 'Pending');
+            const grid = document.getElementById('incoming-orders-grid');
+            grid.innerHTML = '';
+
+            if (pendingOrders.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 50px 20px; background: #fffaf4; border: 1px dashed #ded6c9; border-radius: 16px;">
+                        <span style="font-size: 36px; display: block; margin-bottom: 10px;">✨</span>
+                        <h3 style="font-family: 'Playfair Display', serif; font-size: 22px; color: #2d2822; margin-bottom: 6px;">No Pending Orders</h3>
+                        <p style="color: #756d62; font-size: 14px; margin: 0;">New incoming orders placed by customers or waitstaff will appear here instantly.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            pendingOrders.forEach(order => {
+                grid.innerHTML += `
+                    <div class="kitchen-card status-pending priority-urgent">
+                        <div class="kitchen-card-header">
+                            <div>
+                                <span class="ticket-table">${order.table}</span>
+                                <div class="ticket-number">${order.orderNumber} · ${order.orderType || 'Dine-In'}</div>
+                            </div>
+                            <span class="ticket-time">⏱ ${RAS.timeAgo(order.timestamp)}</span>
+                        </div>
+
+                        <div class="kitchen-card-body">
+                            <div style="margin-bottom: 12px; font-size: 13px; color: #625b52;">
+                                <strong>Guest:</strong> ${order.customerName || 'Dining Customer'}
+                            </div>
+
+                            <div style="margin-bottom: 14px;">
+                                ${order.items.map(item => `
+                                    <div class="ticket-item-row">
+                                        <div class="ticket-item-left">
+                                            <span class="ticket-item-qty">${item.quantity}</span>
+                                            <span class="ticket-item-name">${item.name}</span>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+
+                            ${order.notes ? `
+                                <div class="ticket-notes-box">
+                                    <span>⚠️</span>
+                                    <div><strong>Special Instruction:</strong> ${order.notes}</div>
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <div class="kitchen-card-footer">
+                            <button type="button" class="btn-kitchen-reject" onclick="openRejectModal('${order.orderNumber}', '${order.table}')">
+                                ✕ Reject
+                            </button>
+                            <button type="button" class="btn-kitchen-accept" onclick="acceptIncomingOrder('${order.orderNumber}')">
+                                ✓ Accept Order
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function acceptIncomingOrder(orderNumber) {
+            const updated = RAS.updateOrderStatus(orderNumber, 'Preparing');
+            if (updated) {
+                showToast(`Order #${orderNumber} ACCEPTED! Moved to Kitchen Cooking Pipeline.`, 'success');
+                refreshChefView();
+            }
+        }
+
+        function openRejectModal(orderNumber, table) {
+            document.getElementById('reject-order-number').value = orderNumber;
+            document.getElementById('reject-order-label').textContent = `${orderNumber} (${table})`;
+            document.getElementById('reject-reason-select').value = 'Key ingredient out of stock';
+            document.getElementById('reject-custom-group').style.display = 'none';
+            document.getElementById('reject-modal').classList.add('active');
+        }
+
+        function handleRejectReasonChange(val) {
+            const customGroup = document.getElementById('reject-custom-group');
+            if (val.includes('Other')) {
+                customGroup.style.display = 'block';
+            } else {
+                customGroup.style.display = 'none';
+            }
+        }
+
+        function closeRejectModal() {
+            document.getElementById('reject-modal').classList.remove('active');
+        }
+
+        function handleConfirmReject(e) {
+            e.preventDefault();
+            const orderNumber = document.getElementById('reject-order-number').value;
+            let reason = document.getElementById('reject-reason-select').value;
+            if (reason.includes('Other')) {
+                reason = document.getElementById('reject-custom-text').value.trim() || 'Kitchen operational constraints';
+            }
+
+            RAS.updateOrderStatus(orderNumber, 'Rejected', reason);
+            closeRejectModal();
+            showToast(`Order #${orderNumber} REJECTED (${reason}).`, 'danger');
+            refreshChefView();
+        }
+
+        /* 2. TRACK ORDER / KITCHEN PIPELINE */
+        function renderKitchenPipeline() {
+            const orders = RAS.getOrders();
+            const cookingContainer = document.getElementById('cooking-tickets-container');
+            const readyContainer = document.getElementById('ready-tickets-container');
+
+            cookingContainer.innerHTML = '';
+            readyContainer.innerHTML = '';
+
+            const cookingOrders = orders.filter(o => o.status === 'Preparing');
+            const readyOrders = orders.filter(o => o.status === 'Ready');
+
+            document.getElementById('badge-cooking-col').textContent = cookingOrders.length;
+            document.getElementById('badge-ready-col').textContent = readyOrders.length;
+
+            // Render Cooking Column
+            if (cookingOrders.length === 0) {
+                cookingContainer.innerHTML = '<p style="color: #756d62; text-align: center; padding: 25px;">No orders currently on burners.</p>';
+            } else {
+                cookingOrders.forEach(order => {
+                    cookingContainer.innerHTML += `
+                        <div class="kitchen-card status-preparing" style="background:#fff;">
+                            <div class="kitchen-card-header">
+                                <div>
+                                    <span class="ticket-table">${order.table}</span>
+                                    <div class="ticket-number">${order.orderNumber}</div>
+                                </div>
+                                <span class="ticket-time" style="background:#e3f2fd; color:#1565c0; border-color:#bbdefb;">🔥 Cooking</span>
+                            </div>
+                            <div class="kitchen-card-body">
+                                <div style="font-size: 13px; margin-bottom: 10px;">
+                                    <strong>Prep Checklist:</strong>
+                                </div>
+                                ${order.items.map((item, idx) => `
+                                    <div style="display: flex; align-items: center; gap: 8px; padding: 4px 0;">
+                                        <input type="checkbox" id="chk-${order.orderNumber}-${idx}" style="cursor: pointer;">
+                                        <label for="chk-${order.orderNumber}-${idx}" style="font-size: 14px; cursor: pointer; color: #2d2822;">
+                                            ${item.quantity} × ${item.name}
+                                        </label>
+                                    </div>
+                                `).join('')}
+
+                                ${order.notes ? `
+                                    <div class="ticket-notes-box" style="margin-top: 10px;">
+                                        <span>Chef Note:</span>
+                                        <div>${order.notes}</div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <div class="kitchen-card-footer">
+                                <button type="button" class="btn-kitchen-progress" onclick="markOrderReady('${order.orderNumber}')">
+                                    🍽 Plated & Ready to Serve →
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            // Render Ready Column
+            if (readyOrders.length === 0) {
+                readyContainer.innerHTML = '<p style="color: #756d62; text-align: center; padding: 25px;">Pass counter is clear.</p>';
+            } else {
+                readyOrders.forEach(order => {
+                    readyContainer.innerHTML += `
+                        <div class="kitchen-card status-ready" style="background:#fff;">
+                            <div class="kitchen-card-header">
+                                <div>
+                                    <span class="ticket-table">${order.table}</span>
+                                    <div class="ticket-number">${order.orderNumber}</div>
+                                </div>
+                                <span class="ticket-time" style="background:#e8f5e9; color:#2e7d32; border-color:#c8e6c9;">✓ Ready on Counter</span>
+                            </div>
+                            <div class="kitchen-card-body">
+                                <p style="font-size: 13px; color: #625b52; margin-bottom: 8px;">
+                                    Items plated and awaiting service pickup:
+                                </p>
+                                <ul style="padding-left: 20px; font-size: 14px; color: #2d2822;">
+                                    ${order.items.map(item => `<li><strong>${item.name}</strong> × ${item.quantity}</li>`).join('')}
+                                </ul>
+                            </div>
+                            <div class="kitchen-card-footer">
+                                <button type="button" class="btn-kitchen-accept" onclick="markOrderServed('${order.orderNumber}')">
+                                    ✓ Handed to Waiter / Served
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        function setKitchenStationFilter(station, buttonEl) {
+            currentStationFilter = station;
+            document.querySelectorAll('#tab-pipeline .filter-chip').forEach(btn => btn.classList.remove('active'));
+            buttonEl.classList.add('active');
+            renderKitchenPipeline();
+        }
+
+        function markOrderReady(orderNumber) {
+            RAS.updateOrderStatus(orderNumber, 'Ready');
+            showToast(`Order #${orderNumber} marked as READY FOR SERVICE!`, 'success');
+            refreshChefView();
+        }
+
+        function markOrderServed(orderNumber) {
+            RAS.updateOrderStatus(orderNumber, 'Completed');
+            showToast(`Order #${orderNumber} served and completed!`, 'success');
+            refreshChefView();
+        }
+
+        /* 3. KITCHEN STOCK REPORT */
+        function renderChefStock() {
+            const stock = RAS.getStock();
+            const tbody = document.getElementById('chef-stock-body');
+            tbody.innerHTML = '';
+
+            stock.forEach(item => {
+                const badgeClass = item.status === 'In Stock' ? 'badge-in-stock' : item.status === 'Low Stock' ? 'badge-low-stock' : 'badge-out-of-stock';
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${item.name}</strong></td>
+                        <td><span style="font-size: 12px; background: #faf3eb; padding: 2px 8px; border-radius: 4px;">${item.category}</span></td>
+                        <td><strong>${item.quantity} ${item.unit}</strong></td>
+                        <td style="color: #756d62;">${item.minThreshold} ${item.unit}</td>
+                        <td><span class="status-badge ${badgeClass}">${item.status}</span></td>
+                        <td>
+                            <div style="display:flex; gap: 6px;">
+                                <button class="btn-icon-action" onclick="quickReportStock('${item.id}', 0)" title="Report Out of Stock">Exhausted</button>
+                                <button class="btn-icon-action" onclick="openEmergencyRestockModal('${item.id}')" title="Request Supplies">+ Order</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function quickReportStock(itemId, newQty) {
+            const stock = RAS.getStock();
+            const item = stock.find(s => s.id === itemId);
+            if (!item) return;
+
+            if (confirm(`Mark "${item.name}" as OUT OF STOCK in kitchen?`)) {
+                RAS.updateStockQuantity(itemId, newQty);
+                showToast(`"${item.name}" marked as Out of Stock!`, 'danger');
+                refreshChefView();
+            }
+        }
+
+        function openEmergencyRestockModal(preselectedId = '') {
+            const stock = RAS.getStock();
+            const select = document.getElementById('emergency-item-select');
+            select.innerHTML = '<option value="">-- Select Kitchen Ingredient --</option>';
+
+            stock.forEach(item => {
+                select.innerHTML += `<option value="${item.id}" ${item.id === preselectedId ? 'selected' : ''}>${item.name} (Current: ${item.quantity} ${item.unit})</option>`;
+            });
+
+            document.getElementById('emergency-qty').value = 5;
+            document.getElementById('emergency-stock-modal').classList.add('active');
+        }
+
+        function closeEmergencyRestockModal() {
+            document.getElementById('emergency-stock-modal').classList.remove('active');
+        }
+
+        function handleSendEmergencyStock(e) {
+            e.preventDefault();
+            const select = document.getElementById('emergency-item-select');
+            const itemId = select.value;
+            const stock = RAS.getStock();
+            const item = stock.find(s => s.id === itemId);
+
+            const req = RAS.createStockRequest({
+                itemId: itemId,
+                itemName: item ? item.name : 'Kitchen Raw Material',
+                quantity: parseFloat(document.getElementById('emergency-qty').value),
+                unit: item ? item.unit : 'kg',
+                requestedBy: 'Head Chef Mario (Kitchen)',
+                urgency: 'Urgent',
+                notes: document.getElementById('emergency-notes').value || 'Urgent kitchen restock request.'
+            });
+
+            closeEmergencyRestockModal();
+            showToast(`Urgent request #${req.id} dispatched to Vendor & Manager!`, 'success');
+            refreshChefStats();
+        }
+    </script>
+</body>
+
+</html>

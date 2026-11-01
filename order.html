@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Order | La Tavola</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@500;600;700&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="order-page">
+
+    <!-- NAVBAR -->
+
+    <header class="navbar order-navbar">
+
+        <div class="logo">
+            <span>LA TAVOLA</span>
+            <small>RESTAURANT</small>
+        </div>
+
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="customer.html">My Account</a>
+        </nav>
+
+        <a href="customer.html" class="order-back">
+            ← Back
+        </a>
+
+    </header>
+
+
+    <!-- ORDER PAGE -->
+
+    <main class="order-container">
+
+        <!-- PAGE INTRO -->
+
+        <section class="order-heading">
+
+            <p class="eyebrow">LA TAVOLA MENU</p>
+
+            <h1>
+                Choose something<br>
+                <span>delicious.</span>
+            </h1>
+
+            <p>
+                Take your time. Good food deserves a little thought.
+            </p>
+
+        </section>
+
+
+        <!-- MENU -->
+
+        <section class="menu-section">
+
+            <div class="menu-title">
+                <h2>Our Menu</h2>
+                <span>Freshly prepared · Made with care</span>
+            </div>
+
+
+            <div class="order-layout">
+
+                <!-- MENU ITEMS -->
+
+                <div class="food-grid">
+
+
+                    <!-- ITEM 1 -->
+
+                    <div class="food-card">
+
+                        <div class="food-image pasta-image">
+                            🍝
+                        </div>
+
+                        <div class="food-info">
+
+                            <div class="food-name-price">
+                                <h3>Creamy Truffle Pasta</h3>
+                                <span>₹420</span>
+                            </div>
+
+                            <p>
+                                Creamy pasta finished with truffle,
+                                herbs and parmesan.
+                            </p>
+
+                            <button class="add-button" onclick="addItem('Creamy Truffle Pasta', 420)">
+                                + Add to order
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ITEM 2 -->
+
+                    <div class="food-card">
+
+                        <div class="food-image pizza-image">
+                            🍕
+                        </div>
+
+                        <div class="food-info">
+
+                            <div class="food-name-price">
+                                <h3>Garden Margherita</h3>
+                                <span>₹360</span>
+                            </div>
+
+                            <p>
+                                Classic tomato sauce, mozzarella,
+                                basil and fresh vegetables.
+                            </p>
+
+                            <button class="add-button" onclick="addItem('Garden Margherita', 360)">
+                                + Add to order
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ITEM 3 -->
+
+                    <div class="food-card">
+
+                        <div class="food-image risotto-image">
+                            🍚
+                        </div>
+
+                        <div class="food-info">
+
+                            <div class="food-name-price">
+                                <h3>Herb Risotto</h3>
+                                <span>₹390</span>
+                            </div>
+
+                            <p>
+                                Slow-cooked creamy risotto with
+                                seasonal herbs and parmesan.
+                            </p>
+
+                            <button class="add-button" onclick="addItem('Herb Risotto', 390)">
+                                + Add to order
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ITEM 4 -->
+
+                    <div class="food-card">
+
+                        <div class="food-image sandwich-image">
+                            🥪
+                        </div>
+
+                        <div class="food-info">
+
+                            <div class="food-name-price">
+                                <h3>Grilled Garden Sandwich</h3>
+                                <span>₹280</span>
+                            </div>
+
+                            <p>
+                                Grilled artisan bread with vegetables,
+                                cheese and house dressing.
+                            </p>
+
+                            <button class="add-button" onclick="addItem('Grilled Garden Sandwich', 280)">
+                                + Add to order
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ITEM 5 -->
+
+                    <div class="food-card">
+
+                        <div class="food-image dessert-image">
+                            🍰
+                        </div>
+
+                        <div class="food-info">
+
+                            <div class="food-name-price">
+                                <h3>Classic Tiramisu</h3>
+                                <span>₹280</span>
+                            </div>
+
+                            <p>
+                                Espresso-soaked layers with mascarpone
+                                cream and cocoa.
+                            </p>
+
+                            <button class="add-button" onclick="addItem('Classic Tiramisu', 280)">
+                                + Add to order
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ITEM 6 -->
+
+                    <div class="food-card">
+
+                        <div class="food-image drink-image">
+                            🥤
+                        </div>
+
+                        <div class="food-info">
+
+                            <div class="food-name-price">
+                                <h3>Fresh Citrus Cooler</h3>
+                                <span>₹180</span>
+                            </div>
+
+                            <p>
+                                Fresh citrus, mint and sparkling water
+                                served chilled.
+                            </p>
+
+                            <button class="add-button" onclick="addItem('Fresh Citrus Cooler', 180)">
+                                + Add to order
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ORDER SUMMARY -->
+
+                <aside class="order-summary">
+
+                    <div class="summary-header">
+
+                        <p class="eyebrow">YOUR ORDER</p>
+
+                        <h2>Order Summary</h2>
+
+                    </div>
+
+
+                    <div id="order-items" class="order-items">
+
+                        <div class="empty-order">
+
+                            <span>♡</span>
+
+                            <p>Your order is empty.</p>
+
+                            <small>
+                                Add something delicious from the menu.
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="summary-bottom">
+
+                        <div class="summary-line">
+                            <span>Subtotal</span>
+                            <strong id="subtotal">₹0</strong>
+                        </div>
+
+                        <div class="summary-line">
+                            <span>Service charge</span>
+                            <strong id="service-charge">₹0</strong>
+                        </div>
+
+                        <div class="summary-total">
+                            <span>Total</span>
+                            <strong id="total">₹0</strong>
+                        </div>
+
+
+                        <button class="place-order-button" onclick="placeOrder()">
+                            Place Order →
+                        </button>
+
+                    </div>
+
+                </aside>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- FOOTER -->
+
+    <footer class="order-footer">
+
+        <p>La Tavola · Kolkata, West Bengal</p>
+
+        <span>✦</span>
+
+        <p>Good food. Good moments.</p>
+
+    </footer>
+
+
+    <!-- JAVASCRIPT -->
+
+    <script>
+
+let order = [];
+
+/* ADD ITEM */
+function addItem(name, price) {
+
+    const existingItem = order.find(item => item.name === name);
+
+    if (existingItem) {
+        existingItem.quantity++;
+    } else {
+        order.push({
+            name: name,
+            price: price,
+            quantity: 1
+        });
+    }
+
+    updateOrder();
+}
+
+
+/* UPDATE ORDER DISPLAY */
+function updateOrder() {
+
+    const orderItems = document.getElementById("order-items");
+
+    orderItems.innerHTML = "";
+
+    if (order.length === 0) {
+        orderItems.innerHTML = `
+            <p class="empty-order">
+                Your order is empty.
+            </p>
+        `;
+
+        updateTotals();
+        return;
+    }
+
+    order.forEach((item, index) => {
+
+        orderItems.innerHTML += `
+            <div class="order-item">
+
+                <div>
+                    <strong>${item.name}</strong>
+                    <p>₹${item.price} × ${item.quantity}</p>
+                </div>
+
+                <div class="quantity-controls">
+
+                    <button onclick="decreaseItem(${index})">−</button>
+
+                    <span>${item.quantity}</span>
+
+                    <button onclick="increaseItem(${index})">+</button>
+
+                </div>
+
+            </div>
+        `;
+    });
+
+    updateTotals();
+}
+
+
+/* INCREASE QUANTITY */
+function increaseItem(index) {
+
+    order[index].quantity++;
+
+    updateOrder();
+}
+
+
+/* DECREASE QUANTITY */
+function decreaseItem(index) {
+
+    order[index].quantity--;
+
+    if (order[index].quantity <= 0) {
+        order.splice(index, 1);
+    }
+
+    updateOrder();
+}
+
+
+/* CALCULATE TOTAL */
+function updateTotals() {
+
+    let subtotal = 0;
+
+    order.forEach(item => {
+        subtotal += item.price * item.quantity;
+    });
+
+    const serviceCharge = subtotal * 0.05;
+
+    const total = subtotal + serviceCharge;
+
+    document.getElementById("subtotal").textContent =
+        `₹${subtotal.toFixed(0)}`;
+
+    document.getElementById("service-charge").textContent =
+        `₹${serviceCharge.toFixed(0)}`;
+
+    document.getElementById("total").textContent =
+        `₹${total.toFixed(0)}`;
+}
+
+
+/* PLACE ORDER */
+function placeOrder() {
+
+    if (order.length === 0) {
+        alert("Please add at least one item to your order.");
+        return;
+    }
+
+    let subtotal = 0;
+
+    order.forEach(item => {
+        subtotal += item.price * item.quantity;
+    });
+
+    const serviceCharge = subtotal * 0.05;
+
+    const total = subtotal + serviceCharge;
+
+    /* SAVE THE ACTUAL ORDER */
+    const orderData = {
+        orderNumber: "LT2026-1042",
+        table: "Table 04",
+        customerName: "Customer App",
+        items: order,
+        subtotal: subtotal,
+        serviceCharge: serviceCharge,
+        total: total,
+        status: "Pending" // Sent to Chef for review & acceptance
+    };
+
+    localStorage.setItem(
+        "laTavolaOrder",
+        JSON.stringify(orderData)
+    );
+
+    if (window.RAS) {
+        RAS.addOrder(orderData);
+    }
+
+    alert("Your order has been placed successfully and sent to the kitchen!");
+
+    window.location.href = "track-order.html";
+}
+
+</script>
+
+<script src="js/app-data.js"></script>
+
+</body>
+
+</html>

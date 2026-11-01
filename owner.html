@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Portal | La Tavola</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="staff-portal-page">
+
+    <!-- NAVBAR -->
+    <header class="staff-portal-navbar">
+        <div class="portal-brand">
+            <a href="index.html" class="logo">
+                <span>LA TAVOLA</span>
+                <small>RESTAURANT</small>
+            </a>
+            <span class="portal-role-badge badge-owner">♜ Owner Portal</span>
+        </div>
+
+        <div class="portal-nav-actions">
+            <a href="index.html" class="portal-nav-link">Website</a>
+
+            <div class="role-switcher-dropdown">
+                <button type="button" class="role-switcher-btn" onclick="toggleRoleDropdown()">
+                    <span>Switch Role</span>
+                    <small>▾</small>
+                </button>
+                <div class="role-dropdown-menu" id="role-menu">
+                    <a href="staff-role.html">Role Directory</a>
+                    <a href="manager.html">Manager Portal</a>
+                    <a href="chef.html">Chef KDS</a>
+                    <a href="vendor.html">Vendor Inventory</a>
+                    <a href="customer.html">Customer View</a>
+                </div>
+            </div>
+
+            <a href="login.html" class="portal-logout-btn">Logout</a>
+        </div>
+    </header>
+
+    <!-- MAIN PORTAL CONTENT -->
+    <main class="portal-container">
+
+        <!-- HEADER -->
+        <div class="portal-header">
+            <div class="portal-header-left">
+                <p class="eyebrow">EXECUTIVE ADMINISTRATION</p>
+                <h1>Owner Dashboard</h1>
+                <p>Oversee restaurant menu curation, generate dining bills, and monitor inventory health.</p>
+            </div>
+            <div class="portal-header-right">
+                <div class="portal-time-badge">
+                    <span class="pulse-indicator"></span>
+                    <span id="live-clock">Live Management</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- STATS CARDS -->
+        <div class="portal-stats-grid">
+            <div class="portal-stat-card">
+                <div class="stat-icon">₹</div>
+                <div class="stat-label">Today's Revenue</div>
+                <div class="stat-value" id="stat-revenue">₹0</div>
+                <div class="stat-meta text-success">↑ 14% vs yesterday</div>
+            </div>
+
+            <div class="portal-stat-card">
+                <div class="stat-icon">🍽</div>
+                <div class="stat-label">Menu Items</div>
+                <div class="stat-value" id="stat-menu-count">0</div>
+                <div class="stat-meta" id="stat-menu-active">0 Active dishes</div>
+            </div>
+
+            <div class="portal-stat-card">
+                <div class="stat-icon">📄</div>
+                <div class="stat-label">Generated Bills</div>
+                <div class="stat-value" id="stat-bills-count">0</div>
+                <div class="stat-meta" id="stat-bills-unpaid">0 Unpaid</div>
+            </div>
+
+            <div class="portal-stat-card">
+                <div class="stat-icon">⚠️</div>
+                <div class="stat-label">Stock Alerts</div>
+                <div class="stat-value" id="stat-stock-alerts">0</div>
+                <div class="stat-meta text-warning">Requires restock</div>
+            </div>
+        </div>
+
+        <!-- TAB NAVIGATION -->
+        <div class="portal-tabs-nav">
+            <button class="portal-tab-btn active" onclick="switchTab('overview')">
+                <span>✦ Overview</span>
+            </button>
+            <button class="portal-tab-btn" onclick="switchTab('menu')">
+                <span>📖 Menu Management</span>
+                <span class="tab-badge" id="badge-menu-count">0</span>
+            </button>
+            <button class="portal-tab-btn" onclick="switchTab('billing')">
+                <span>🧾 Bill Generation</span>
+                <span class="tab-badge" id="badge-bill-count">0</span>
+            </button>
+            <button class="portal-tab-btn" onclick="switchTab('stock')">
+                <span>📦 Stock Report</span>
+                <span class="tab-badge" id="badge-stock-alerts">0</span>
+            </button>
+        </div>
+
+        <!-- ================= TAB 1: OVERVIEW ================= -->
+        <section id="tab-overview" class="tab-pane active">
+            <div class="portal-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Operational Overview</h2>
+                        <p>Real-time status of La Tavola operations, active menus, and business revenue.</p>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-primary-action" onclick="openAddMenuModal()">+ New Menu Item</button>
+                        <button class="btn-secondary-action" onclick="openNewBillModal()">+ Generate Bill</button>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 24px;">
+                    <!-- RECENT SALES & INVOICES -->
+                    <div style="background: #fbf8f3; border: 1px solid #ede5db; border-radius: 14px; padding: 22px;">
+                        <h3 style="font-family: 'Playfair Display', serif; margin: 0 0 16px; font-size: 20px;">Recent Generated Bills</h3>
+                        <div class="portal-table-container">
+                            <table class="portal-table">
+                                <thead>
+                                    <tr>
+                                        <th>Bill #</th>
+                                        <th>Table</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="overview-recent-bills">
+                                    <!-- Rendered dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- CRITICAL STOCK NOTICES -->
+                    <div style="background: #fbf8f3; border: 1px solid #ede5db; border-radius: 14px; padding: 22px;">
+                        <h3 style="font-family: 'Playfair Display', serif; margin: 0 0 16px; font-size: 20px;">Low Stock Warnings</h3>
+                        <div id="overview-stock-warnings" style="display: flex; flex-direction: column; gap: 10px;">
+                            <!-- Rendered dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 2: MENU MANAGEMENT (FEATURE #2) ================= -->
+        <section id="tab-menu" class="tab-pane">
+            <div class="portal-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Menu Management</h2>
+                        <p>Add, modify, remove, and toggle availability of dishes served at La Tavola.</p>
+                    </div>
+                    <button class="btn-primary-action" onclick="openAddMenuModal()">
+                        <span>+ Add New Dish</span>
+                    </button>
+                </div>
+
+                <!-- TOOLBAR -->
+                <div class="portal-toolbar">
+                    <div class="toolbar-search">
+                        <span>🔍</span>
+                        <input type="text" id="menu-search-input" placeholder="Search dishes by name or ingredient..." oninput="filterMenuItems()">
+                    </div>
+
+                    <div class="toolbar-filters">
+                        <button class="filter-chip active" onclick="setMenuCategoryFilter('All', this)">All Categories</button>
+                        <button class="filter-chip" onclick="setMenuCategoryFilter('Mains', this)">Mains</button>
+                        <button class="filter-chip" onclick="setMenuCategoryFilter('Pizza', this)">Pizza</button>
+                        <button class="filter-chip" onclick="setMenuCategoryFilter('Starters', this)">Starters</button>
+                        <button class="filter-chip" onclick="setMenuCategoryFilter('Desserts', this)">Desserts</button>
+                        <button class="filter-chip" onclick="setMenuCategoryFilter('Beverages', this)">Beverages</button>
+                    </div>
+                </div>
+
+                <!-- MENU ITEMS GRID -->
+                <div class="menu-admin-grid" id="menu-items-grid">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 3: BILL GENERATION (FEATURE #3) ================= -->
+        <section id="tab-billing" class="tab-pane">
+            <div class="portal-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Bill Generation & Invoicing</h2>
+                        <p>Generate dining invoices, calculate taxes, and view recent transaction receipts.</p>
+                    </div>
+                    <button class="btn-primary-action" onclick="openNewBillModal()">
+                        <span>+ Generate New Bill</span>
+                    </button>
+                </div>
+
+                <!-- BILLS TABLE -->
+                <div class="portal-table-container">
+                    <table class="portal-table">
+                        <thead>
+                            <tr>
+                                <th>Bill Number</th>
+                                <th>Order Ref</th>
+                                <th>Table / Guest</th>
+                                <th>Date & Time</th>
+                                <th>Items</th>
+                                <th>Total</th>
+                                <th>Payment</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bills-table-body">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 4: STOCK REPORT (FEATURE #7) ================= -->
+        <section id="tab-stock" class="tab-pane">
+            <div class="portal-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Restaurant Stock Report</h2>
+                        <p>Monitor kitchen pantry, dairy, produce, and bar inventory levels across the restaurant.</p>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-secondary-action" onclick="requestRestockVendorAlert()">📢 Alert Vendor</button>
+                        <a href="vendor.html" class="btn-primary-action" style="text-decoration:none;">Open Vendor Supply</a>
+                    </div>
+                </div>
+
+                <!-- TOOLBAR -->
+                <div class="portal-toolbar">
+                    <div class="toolbar-search">
+                        <span>🔍</span>
+                        <input type="text" id="stock-search-input" placeholder="Search inventory item..." oninput="filterStockItems()">
+                    </div>
+
+                    <div class="toolbar-filters">
+                        <button class="filter-chip active" onclick="setStockStatusFilter('All', this)">All Items</button>
+                        <button class="filter-chip" onclick="setStockStatusFilter('In Stock', this)">In Stock</button>
+                        <button class="filter-chip" onclick="setStockStatusFilter('Low Stock', this)">Low Stock</button>
+                        <button class="filter-chip" onclick="setStockStatusFilter('Out of Stock', this)">Out of Stock</button>
+                    </div>
+                </div>
+
+                <!-- STOCK TABLE -->
+                <div class="portal-table-container">
+                    <table class="portal-table">
+                        <thead>
+                            <tr>
+                                <th>SKU / ID</th>
+                                <th>Item Name</th>
+                                <th>Category</th>
+                                <th>Current Quantity</th>
+                                <th>Min Threshold</th>
+                                <th>Status</th>
+                                <th>Supplier</th>
+                                <th>Last Restocked</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stock-table-body">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL: ADD / EDIT MENU ITEM -->
+    <div class="modal-overlay" id="menu-modal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="menu-modal-title">Add New Menu Item</h3>
+                <button type="button" class="modal-close-btn" onclick="closeMenuModal()">×</button>
+            </div>
+            <form id="menu-form" onsubmit="handleSaveMenuItem(event)">
+                <input type="hidden" id="menu-edit-id" value="">
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="item-name">Dish Name *</label>
+                            <input type="text" id="item-name" class="form-control" placeholder="e.g. Pappardelle al Tartufo" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="item-price">Price (₹) *</label>
+                            <input type="number" id="item-price" class="form-control" placeholder="e.g. 450" min="10" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="item-category">Category *</label>
+                            <select id="item-category" class="form-control" required>
+                                <option value="Mains">Mains</option>
+                                <option value="Pizza">Pizza</option>
+                                <option value="Starters">Starters</option>
+                                <option value="Desserts">Desserts</option>
+                                <option value="Beverages">Beverages</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="item-icon">Emoji Icon</label>
+                            <input type="text" id="item-icon" class="form-control" placeholder="🍝, 🍕, 🥗, ☕" value="🍽">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="item-description">Description</label>
+                        <textarea id="item-description" class="form-control" rows="3" placeholder="Briefly describe key ingredients, flavors and preparation..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" id="item-available" checked>
+                            <span>Available immediately for ordering</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary-action" onclick="closeMenuModal()">Cancel</button>
+                    <button type="submit" class="btn-primary-action">Save Dish</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: GENERATE NEW BILL -->
+    <div class="modal-overlay" id="bill-modal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>Generate Dining Bill</h3>
+                <button type="button" class="modal-close-btn" onclick="closeBillModal()">×</button>
+            </div>
+            <form id="bill-form" onsubmit="handleGenerateBill(event)">
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bill-table">Dining Table *</label>
+                            <select id="bill-table" class="form-control" required onchange="populateBillOrderSuggestion(this.value)">
+                                <option value="Table 01">Table 01</option>
+                                <option value="Table 02">Table 02</option>
+                                <option value="Table 03">Table 03</option>
+                                <option value="Table 04">Table 04 (Customer App)</option>
+                                <option value="Table 05">Table 05</option>
+                                <option value="Table 07">Table 07</option>
+                                <option value="Takeaway Counter">Takeaway Counter</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="bill-guest">Guest Name</label>
+                            <input type="text" id="bill-guest" class="form-control" placeholder="Guest / Customer Name" value="Guest Diners">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Select Ordered Items</label>
+                        <div id="bill-item-selector" style="max-height: 180px; overflow-y: auto; border: 1px solid #ded6c9; border-radius: 8px; padding: 10px; background: #fffaf4;">
+                            <!-- Populated with checkboxes & quantity inputs -->
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bill-discount">Discount (₹)</label>
+                            <input type="number" id="bill-discount" class="form-control" value="0" min="0" oninput="calculateBillTotals()">
+                        </div>
+                        <div class="form-group">
+                            <label for="bill-payment-status">Initial Payment Status</label>
+                            <select id="bill-payment-status" class="form-control">
+                                <option value="Unpaid">Unpaid (Awaiting Payment)</option>
+                                <option value="Paid">Paid Immediately</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- BILL PREVIEW SUMMARY -->
+                    <div style="background: #fbf8f3; border: 1px solid #ded6c9; border-radius: 8px; padding: 14px; font-size: 13px;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom: 4px;">
+                            <span>Subtotal:</span>
+                            <strong id="bill-calc-subtotal">₹0</strong>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom: 4px;">
+                            <span>GST (5%):</span>
+                            <span id="bill-calc-tax">₹0</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom: 4px;">
+                            <span>Service Charge (5%):</span>
+                            <span id="bill-calc-service">₹0</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-top: 8px; padding-top: 8px; border-top: 1px dashed #ccc; font-size: 15px; font-weight: 700; color: #a65f42;">
+                            <span>Total Payable:</span>
+                            <span id="bill-calc-total">₹0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary-action" onclick="closeBillModal()">Cancel</button>
+                    <button type="submit" class="btn-primary-action">Generate & Save Bill</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: PRINTABLE RECEIPT VIEW -->
+    <div class="modal-overlay" id="receipt-modal">
+        <div class="modal-box" style="max-width: 460px;">
+            <div class="modal-header">
+                <h3>Official Invoice / Receipt</h3>
+                <button type="button" class="modal-close-btn" onclick="closeReceiptModal()">×</button>
+            </div>
+            <div class="modal-body" id="receipt-printable-content">
+                <!-- Dynamically generated receipt -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary-action" onclick="closeReceiptModal()">Close</button>
+                <button type="button" class="btn-primary-action" onclick="window.print()">🖨 Print Invoice</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- SCRIPTS -->
+    <script src="js/app-data.js"></script>
+    <script>
+        // State variables
+        let currentMenuCategory = 'All';
+        let currentStockStatus = 'All';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderDashboard();
+            updateLiveClock();
+            setInterval(updateLiveClock, 30000);
+        });
+
+        function updateLiveClock() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('live-clock').textContent = `Kolkata · ${timeStr}`;
+        }
+
+        function toggleRoleDropdown() {
+            const menu = document.getElementById('role-menu');
+            menu.classList.toggle('show');
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.closest('.role-switcher-dropdown')) {
+                const dropdowns = document.getElementsByClassName("role-dropdown-menu");
+                for (let i = 0; i < dropdowns.length; i++) {
+                    dropdowns[i].classList.remove('show');
+                }
+            }
+        };
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.portal-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+
+            const activeBtn = Array.from(document.querySelectorAll('.portal-tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+            if (activeBtn) activeBtn.classList.add('active');
+
+            const targetPane = document.getElementById('tab-' + tabId);
+            if (targetPane) targetPane.classList.add('active');
+
+            if (tabId === 'menu') renderMenuAdmin();
+            if (tabId === 'billing') renderBills();
+            if (tabId === 'stock') renderStock();
+            if (tabId === 'overview') renderDashboard();
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type === 'success' ? 'toast-success' : type === 'danger' ? 'toast-danger' : ''}`;
+            toast.innerHTML = `<span>${type === 'success' ? '✓' : type === 'danger' ? '✕' : '✦'}</span> <div>${message}</div>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        /* DASHBOARD RENDERING */
+        function renderDashboard() {
+            const menu = RAS.getMenu();
+            const bills = RAS.getBills();
+            const stock = RAS.getStock();
+
+            // Total revenue
+            const totalRev = bills.filter(b => b.paymentStatus === 'Paid').reduce((acc, b) => acc + b.total, 0);
+            document.getElementById('stat-revenue').textContent = RAS.formatCurrency(totalRev);
+
+            // Menu count
+            document.getElementById('stat-menu-count').textContent = menu.length;
+            const activeDishes = menu.filter(m => m.available).length;
+            document.getElementById('stat-menu-active').textContent = `${activeDishes} Active Dishes`;
+            document.getElementById('badge-menu-count').textContent = menu.length;
+
+            // Bills count
+            document.getElementById('stat-bills-count').textContent = bills.length;
+            const unpaidBills = bills.filter(b => b.paymentStatus === 'Unpaid').length;
+            document.getElementById('stat-bills-unpaid').textContent = `${unpaidBills} Unpaid`;
+            document.getElementById('badge-bill-count').textContent = bills.length;
+
+            // Stock alerts
+            const stockAlerts = stock.filter(s => s.status !== 'In Stock').length;
+            document.getElementById('stat-stock-alerts').textContent = stockAlerts;
+            document.getElementById('badge-stock-alerts').textContent = stockAlerts;
+
+            // Overview recent bills
+            const recentBillsContainer = document.getElementById('overview-recent-bills');
+            recentBillsContainer.innerHTML = '';
+            bills.slice(0, 4).forEach(bill => {
+                recentBillsContainer.innerHTML += `
+                    <tr>
+                        <td><strong>${bill.billNumber}</strong></td>
+                        <td>${bill.table}</td>
+                        <td><strong>${RAS.formatCurrency(bill.total)}</strong></td>
+                        <td>
+                            <span class="status-badge ${bill.paymentStatus === 'Paid' ? 'badge-paid' : 'badge-unpaid'}">
+                                ${bill.paymentStatus}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn-icon-action" onclick="viewReceipt('${bill.billNumber}')">View Receipt</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            // Overview stock warnings
+            const warningsContainer = document.getElementById('overview-stock-warnings');
+            warningsContainer.innerHTML = '';
+            const lowStockItems = stock.filter(s => s.status !== 'In Stock');
+            if (lowStockItems.length === 0) {
+                warningsContainer.innerHTML = '<p style="color: #2e7d32; font-size: 14px;">All stock levels are optimal.</p>';
+            } else {
+                lowStockItems.forEach(item => {
+                    warningsContainer.innerHTML += `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: #fff; border-radius: 8px; border: 1px solid #ded6c9;">
+                            <div>
+                                <strong>${item.name}</strong>
+                                <div style="font-size: 12px; color: #756d62;">${item.quantity} ${item.unit} remaining (Min: ${item.minThreshold} ${item.unit})</div>
+                            </div>
+                            <span class="status-badge ${item.status === 'Out of Stock' ? 'badge-out-of-stock' : 'badge-low-stock'}">
+                                ${item.status}
+                            </span>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        /* MENU MANAGEMENT */
+        function renderMenuAdmin() {
+            const menu = RAS.getMenu();
+            const grid = document.getElementById('menu-items-grid');
+            const searchVal = (document.getElementById('menu-search-input').value || '').toLowerCase();
+
+            grid.innerHTML = '';
+
+            const filtered = menu.filter(item => {
+                const matchCategory = currentMenuCategory === 'All' || item.category === currentMenuCategory;
+                const matchSearch = item.name.toLowerCase().includes(searchVal) || (item.description && item.description.toLowerCase().includes(searchVal));
+                return matchCategory && matchSearch;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #756d62; padding: 40px;">No dishes match your filter.</p>';
+                return;
+            }
+
+            filtered.forEach(item => {
+                grid.innerHTML += `
+                    <div class="menu-admin-card ${!item.available ? 'unavailable' : ''}">
+                        <div class="menu-admin-card-top">
+                            <div class="menu-card-icon">${item.icon || '🍽'}</div>
+                            <div class="menu-card-details">
+                                <span class="menu-card-badge">${item.category}</span>
+                                <h3>${item.name}</h3>
+                                <div class="menu-card-price">${RAS.formatCurrency(item.price)}</div>
+                            </div>
+                        </div>
+
+                        <p class="menu-card-desc">${item.description || 'Delicious freshly prepared authentic specialty dish.'}</p>
+
+                        <div class="menu-card-actions">
+                            <label class="availability-toggle">
+                                <div class="switch">
+                                    <input type="checkbox" ${item.available ? 'checked' : ''} onchange="toggleItemAvailability('${item.id}')">
+                                    <span class="slider"></span>
+                                </div>
+                                <span>${item.available ? 'Available' : 'Sold Out'}</span>
+                            </label>
+
+                            <div class="menu-btn-group">
+                                <button class="btn-icon-action" onclick="openEditMenuModal('${item.id}')" title="Edit Dish">✏️ Edit</button>
+                                <button class="btn-icon-action btn-icon-danger" onclick="deleteMenuItem('${item.id}')" title="Delete Dish">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function setMenuCategoryFilter(category, buttonEl) {
+            currentMenuCategory = category;
+            document.querySelectorAll('#tab-menu .filter-chip').forEach(btn => btn.classList.remove('active'));
+            buttonEl.classList.add('active');
+            renderMenuAdmin();
+        }
+
+        function filterMenuItems() {
+            renderMenuAdmin();
+        }
+
+        function toggleItemAvailability(id) {
+            const updated = RAS.toggleMenuAvailability(id);
+            if (updated) {
+                showToast(`"${updated.name}" is now marked as ${updated.available ? 'Available' : 'Sold Out'}.`, 'success');
+                renderMenuAdmin();
+                renderDashboard();
+            }
+        }
+
+        function openAddMenuModal() {
+            document.getElementById('menu-form').reset();
+            document.getElementById('menu-edit-id').value = '';
+            document.getElementById('menu-modal-title').textContent = 'Add New Menu Item';
+            document.getElementById('item-available').checked = true;
+            document.getElementById('menu-modal').classList.add('active');
+        }
+
+        function openEditMenuModal(id) {
+            const menu = RAS.getMenu();
+            const item = menu.find(i => i.id === id);
+            if (!item) return;
+
+            document.getElementById('menu-edit-id').value = item.id;
+            document.getElementById('item-name').value = item.name;
+            document.getElementById('item-price').value = item.price;
+            document.getElementById('item-category').value = item.category;
+            document.getElementById('item-icon').value = item.icon || '🍽';
+            document.getElementById('item-description').value = item.description || '';
+            document.getElementById('item-available').checked = item.available;
+
+            document.getElementById('menu-modal-title').textContent = 'Edit Menu Item';
+            document.getElementById('menu-modal').classList.add('active');
+        }
+
+        function closeMenuModal() {
+            document.getElementById('menu-modal').classList.remove('active');
+        }
+
+        function handleSaveMenuItem(e) {
+            e.preventDefault();
+            const editId = document.getElementById('menu-edit-id').value;
+            const itemData = {
+                name: document.getElementById('item-name').value.trim(),
+                price: parseFloat(document.getElementById('item-price').value),
+                category: document.getElementById('item-category').value,
+                icon: document.getElementById('item-icon').value.trim() || '🍽',
+                description: document.getElementById('item-description').value.trim(),
+                available: document.getElementById('item-available').checked
+            };
+
+            if (editId) {
+                RAS.updateMenuItem(editId, itemData);
+                showToast(`Updated "${itemData.name}" successfully!`, 'success');
+            } else {
+                RAS.addMenuItem(itemData);
+                showToast(`Added new dish "${itemData.name}" to menu!`, 'success');
+            }
+
+            closeMenuModal();
+            renderMenuAdmin();
+            renderDashboard();
+        }
+
+        function deleteMenuItem(id) {
+            const menu = RAS.getMenu();
+            const item = menu.find(i => i.id === id);
+            if (!item) return;
+
+            if (confirm(`Are you sure you want to remove "${item.name}" from the menu?`)) {
+                RAS.deleteMenuItem(id);
+                showToast(`"${item.name}" has been removed.`, 'danger');
+                renderMenuAdmin();
+                renderDashboard();
+            }
+        }
+
+        /* BILL GENERATION */
+        function renderBills() {
+            const bills = RAS.getBills();
+            const tbody = document.getElementById('bills-table-body');
+            tbody.innerHTML = '';
+
+            if (bills.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #756d62; padding: 30px;">No bills generated yet.</td></tr>';
+                return;
+            }
+
+            bills.forEach(bill => {
+                const itemsSummary = bill.items.map(i => `${i.name} (×${i.quantity})`).join(', ');
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${bill.billNumber}</strong></td>
+                        <td><small style="color:#756d62">${bill.orderNumber}</small></td>
+                        <td>${bill.table}<br><small style="color:#8d8579">${bill.customerName}</small></td>
+                        <td>${bill.date}</td>
+                        <td style="max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${itemsSummary}">${itemsSummary}</td>
+                        <td><strong>${RAS.formatCurrency(bill.total)}</strong></td>
+                        <td>
+                            <span class="status-badge ${bill.paymentStatus === 'Paid' ? 'badge-paid' : 'badge-unpaid'}">
+                                ${bill.paymentStatus}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn-icon-action" onclick="viewReceipt('${bill.billNumber}')">🖨 View Invoice</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function openNewBillModal() {
+            const menu = RAS.getMenu();
+            const selector = document.getElementById('bill-item-selector');
+            selector.innerHTML = '';
+
+            menu.forEach((item, index) => {
+                selector.innerHTML += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #ede5db;">
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; flex: 1;">
+                            <input type="checkbox" class="bill-item-checkbox" data-index="${index}" data-name="${item.name}" data-price="${item.price}" onchange="calculateBillTotals()">
+                            <span>${item.icon || '🍽'} ${item.name} (${RAS.formatCurrency(item.price)})</span>
+                        </label>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span style="font-size: 11px; color: #756d62;">Qty:</span>
+                            <input type="number" class="bill-item-qty" data-index="${index}" value="1" min="1" max="20" style="width: 50px; padding: 4px; border: 1px solid #ded6c9; border-radius: 4px; text-align: center;" onchange="calculateBillTotals()">
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('bill-discount').value = 0;
+            calculateBillTotals();
+            document.getElementById('bill-modal').classList.add('active');
+        }
+
+        function populateBillOrderSuggestion(tableVal) {
+            const orders = RAS.getOrders();
+            const matchingOrder = orders.find(o => o.table === tableVal && o.status !== 'Completed');
+            if (matchingOrder) {
+                document.getElementById('bill-guest').value = matchingOrder.customerName || 'Dining Guest';
+                showToast(`Prefilled with active order for ${tableVal}.`, 'info');
+            }
+        }
+
+        function calculateBillTotals() {
+            const checkboxes = document.querySelectorAll('.bill-item-checkbox:checked');
+            let subtotal = 0;
+
+            checkboxes.forEach(cb => {
+                const idx = cb.getAttribute('data-index');
+                const price = parseFloat(cb.getAttribute('data-price'));
+                const qtyInput = document.querySelector(`.bill-item-qty[data-index="${idx}"]`);
+                const qty = qtyInput ? parseInt(qtyInput.value) || 1 : 1;
+                subtotal += price * qty;
+            });
+
+            const discount = parseFloat(document.getElementById('bill-discount').value) || 0;
+            const taxable = Math.max(0, subtotal - discount);
+            const taxGst = taxable * 0.05;
+            const serviceCharge = taxable * 0.05;
+            const total = taxable + taxGst + serviceCharge;
+
+            document.getElementById('bill-calc-subtotal').textContent = RAS.formatCurrency(subtotal);
+            document.getElementById('bill-calc-tax').textContent = RAS.formatCurrency(taxGst);
+            document.getElementById('bill-calc-service').textContent = RAS.formatCurrency(serviceCharge);
+            document.getElementById('bill-calc-total').textContent = RAS.formatCurrency(total);
+
+            return { subtotal, discount, taxGst, serviceCharge, total };
+        }
+
+        function handleGenerateBill(e) {
+            e.preventDefault();
+            const checkboxes = document.querySelectorAll('.bill-item-checkbox:checked');
+            if (checkboxes.length === 0) {
+                alert('Please select at least one menu item for the bill.');
+                return;
+            }
+
+            const items = [];
+            checkboxes.forEach(cb => {
+                const idx = cb.getAttribute('data-index');
+                const name = cb.getAttribute('data-name');
+                const price = parseFloat(cb.getAttribute('data-price'));
+                const qtyInput = document.querySelector(`.bill-item-qty[data-index="${idx}"]`);
+                const quantity = qtyInput ? parseInt(qtyInput.value) || 1 : 1;
+                items.push({ name, price, quantity });
+            });
+
+            const totals = calculateBillTotals();
+            const table = document.getElementById('bill-table').value;
+            const guest = document.getElementById('bill-guest').value.trim() || 'Guest Diner';
+            const status = document.getElementById('bill-payment-status').value;
+
+            const newBill = RAS.createBill({
+                table: table,
+                customerName: guest,
+                items: items,
+                subtotal: totals.subtotal,
+                discount: totals.discount,
+                taxGst: totals.taxGst,
+                serviceCharge: totals.serviceCharge,
+                total: totals.total,
+                paymentStatus: status,
+                paymentMethod: status === 'Paid' ? 'Counter Cash / Card' : 'Pending'
+            });
+
+            closeBillModal();
+            showToast(`Bill #${newBill.billNumber} created successfully!`, 'success');
+            renderBills();
+            renderDashboard();
+            viewReceipt(newBill.billNumber);
+        }
+
+        function closeBillModal() {
+            document.getElementById('bill-modal').classList.remove('active');
+        }
+
+        function viewReceipt(billNumber) {
+            const bills = RAS.getBills();
+            const bill = bills.find(b => b.billNumber === billNumber);
+            if (!bill) return;
+
+            const container = document.getElementById('receipt-printable-content');
+            container.innerHTML = `
+                <div class="receipt-sheet printable-area">
+                    <div class="receipt-header">
+                        <h2>LA TAVOLA</h2>
+                        <p>Authentic Italian Restaurant & Lounge</p>
+                        <p>Park Street, Kolkata, West Bengal</p>
+                        <p>GSTIN: 19AABCL8294K1Z3</p>
+                    </div>
+
+                    <div class="receipt-meta">
+                        <div style="display:flex; justify-content:space-between;">
+                            <span><strong>INVOICE:</strong> ${bill.billNumber}</span>
+                            <span><strong>DATE:</strong> ${bill.date}</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-top: 4px;">
+                            <span><strong>TABLE:</strong> ${bill.table}</span>
+                            <span><strong>GUEST:</strong> ${bill.customerName}</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-top: 4px;">
+                            <span><strong>PAYMENT:</strong> ${bill.paymentStatus} (${bill.paymentMethod || 'Pending'})</span>
+                            <span><strong>ORDER REF:</strong> ${bill.orderNumber || '-'}</span>
+                        </div>
+                    </div>
+
+                    <table class="receipt-table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th style="text-align:center;">Qty</th>
+                                <th style="text-align:right;">Price</th>
+                                <th style="text-align:right;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${bill.items.map(item => `
+                                <tr>
+                                    <td>${item.name}</td>
+                                    <td style="text-align:center;">${item.quantity}</td>
+                                    <td style="text-align:right;">₹${item.price}</td>
+                                    <td style="text-align:right;">₹${item.price * item.quantity}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+
+                    <div class="receipt-totals">
+                        <div class="receipt-totals-row">
+                            <span>Subtotal</span>
+                            <span>${RAS.formatCurrency(bill.subtotal)}</span>
+                        </div>
+                        ${bill.discount > 0 ? `
+                            <div class="receipt-totals-row" style="color: #2e7d32;">
+                                <span>Discount</span>
+                                <span>-${RAS.formatCurrency(bill.discount)}</span>
+                            </div>
+                        ` : ''}
+                        <div class="receipt-totals-row">
+                            <span>GST (5%)</span>
+                            <span>${RAS.formatCurrency(bill.taxGst)}</span>
+                        </div>
+                        <div class="receipt-totals-row">
+                            <span>Service Charge (5%)</span>
+                            <span>${RAS.formatCurrency(bill.serviceCharge)}</span>
+                        </div>
+                        <div class="receipt-totals-row grand-total">
+                            <span>Grand Total</span>
+                            <span>${RAS.formatCurrency(bill.total)}</span>
+                        </div>
+                    </div>
+
+                    <div style="text-align:center; margin-top: 25px; font-size: 11px; color: #888;">
+                        <p>Thank you for dining with us!</p>
+                        <p>Buon Appetito · Visit again soon</p>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('receipt-modal').classList.add('active');
+        }
+
+        function closeReceiptModal() {
+            document.getElementById('receipt-modal').classList.remove('active');
+        }
+
+        /* STOCK REPORT */
+        function renderStock() {
+            const stock = RAS.getStock();
+            const tbody = document.getElementById('stock-table-body');
+            const searchVal = (document.getElementById('stock-search-input').value || '').toLowerCase();
+
+            tbody.innerHTML = '';
+
+            const filtered = stock.filter(item => {
+                const matchStatus = currentStockStatus === 'All' || item.status === currentStockStatus;
+                const matchSearch = item.name.toLowerCase().includes(searchVal) || item.category.toLowerCase().includes(searchVal);
+                return matchStatus && matchSearch;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #756d62; padding: 30px;">No stock items match filter.</td></tr>';
+                return;
+            }
+
+            filtered.forEach(item => {
+                const badgeClass = item.status === 'In Stock' ? 'badge-in-stock' : item.status === 'Low Stock' ? 'badge-low-stock' : 'badge-out-of-stock';
+                tbody.innerHTML += `
+                    <tr>
+                        <td><code>${item.id}</code></td>
+                        <td><strong>${item.name}</strong></td>
+                        <td><span style="font-size: 12px; background: #fbf5ee; padding: 2px 8px; border-radius: 4px;">${item.category}</span></td>
+                        <td><strong>${item.quantity} ${item.unit}</strong></td>
+                        <td style="color: #756d62;">${item.minThreshold} ${item.unit}</td>
+                        <td><span class="status-badge ${badgeClass}">${item.status}</span></td>
+                        <td style="color: #625b52;">${item.supplier}</td>
+                        <td><small style="color: #8d8579;">${item.lastRestocked}</small></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function setStockStatusFilter(status, buttonEl) {
+            currentStockStatus = status;
+            document.querySelectorAll('#tab-stock .filter-chip').forEach(btn => btn.classList.remove('active'));
+            buttonEl.classList.add('active');
+            renderStock();
+        }
+
+        function filterStockItems() {
+            renderStock();
+        }
+
+        function requestRestockVendorAlert() {
+            const stock = RAS.getStock();
+            const lowItems = stock.filter(s => s.status !== 'In Stock');
+            if (lowItems.length === 0) {
+                showToast('All stock items are sufficient. No urgent orders needed.', 'info');
+                return;
+            }
+
+            lowItems.forEach(item => {
+                RAS.createStockRequest({
+                    itemId: item.id,
+                    itemName: item.name,
+                    quantity: item.minThreshold * 2,
+                    unit: item.unit,
+                    requestedBy: 'Owner Executive',
+                    urgency: item.status === 'Out of Stock' ? 'Urgent' : 'Normal',
+                    notes: 'Automated alert from Owner Stock Report'
+                });
+            });
+
+            showToast(`Sent restock requests for ${lowItems.length} low-stock items to Vendor!`, 'success');
+        }
+    </script>
+</body>
+
+</html>

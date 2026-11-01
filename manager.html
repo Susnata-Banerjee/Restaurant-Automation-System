@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manager Portal | La Tavola</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="staff-portal-page">
+
+    <!-- NAVBAR -->
+    <header class="staff-portal-navbar">
+        <div class="portal-brand">
+            <a href="index.html" class="logo">
+                <span>LA TAVOLA</span>
+                <small>RESTAURANT</small>
+            </a>
+            <span class="portal-role-badge badge-manager">◫ Manager Portal</span>
+        </div>
+
+        <div class="portal-nav-actions">
+            <a href="index.html" class="portal-nav-link">Website</a>
+
+            <div class="role-switcher-dropdown">
+                <button type="button" class="role-switcher-btn" onclick="toggleRoleDropdown()">
+                    <span>Switch Role</span>
+                    <small>▾</small>
+                </button>
+                <div class="role-dropdown-menu" id="role-menu">
+                    <a href="staff-role.html">Role Directory</a>
+                    <a href="owner.html">Owner Portal</a>
+                    <a href="chef.html">Chef KDS</a>
+                    <a href="vendor.html">Vendor Inventory</a>
+                    <a href="customer.html">Customer View</a>
+                </div>
+            </div>
+
+            <a href="login.html" class="portal-logout-btn">Logout</a>
+        </div>
+    </header>
+
+    <!-- MAIN PORTAL CONTAINER -->
+    <main class="portal-container">
+
+        <!-- HEADER -->
+        <div class="portal-header">
+            <div class="portal-header-left">
+                <p class="eyebrow">FLOOR & SERVICE OPERATIONS</p>
+                <h1>Restaurant Operations Manager</h1>
+                <p>Track live customer orders, generate table invoices, accept payments, and monitor pantry stocks.</p>
+            </div>
+            <div class="portal-header-right">
+                <div class="portal-time-badge">
+                    <span class="pulse-indicator"></span>
+                    <span id="manager-live-clock">Floor Active</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- STATS CARDS -->
+        <div class="portal-stats-grid">
+            <div class="portal-stat-card">
+                <div class="stat-icon">🔔</div>
+                <div class="stat-label">Live Active Orders</div>
+                <div class="stat-value" id="stat-active-orders">0</div>
+                <div class="stat-meta text-warning" id="stat-orders-detail">0 In Kitchen</div>
+            </div>
+
+            <div class="portal-stat-card">
+                <div class="stat-icon">💳</div>
+                <div class="stat-label">Pending Payments</div>
+                <div class="stat-value" id="stat-pending-bills">0</div>
+                <div class="stat-meta text-danger" id="stat-unpaid-amount">₹0 Uncollected</div>
+            </div>
+
+            <div class="portal-stat-card">
+                <div class="stat-icon">💵</div>
+                <div class="stat-label">Counter Collected</div>
+                <div class="stat-value" id="stat-collected-revenue">₹0</div>
+                <div class="stat-meta text-success">Today's Paid Total</div>
+            </div>
+
+            <div class="portal-stat-card">
+                <div class="stat-icon">📦</div>
+                <div class="stat-label">Stock Status</div>
+                <div class="stat-value" id="stat-stock-status">0</div>
+                <div class="stat-meta text-warning">Items below min threshold</div>
+            </div>
+        </div>
+
+        <!-- TAB NAVIGATION -->
+        <div class="portal-tabs-nav">
+            <button class="portal-tab-btn active" onclick="switchManagerTab('track')">
+                <span>⏱ Track Orders</span>
+                <span class="tab-badge" id="badge-track-count">0</span>
+            </button>
+            <button class="portal-tab-btn" onclick="switchManagerTab('billing')">
+                <span>🧾 Bill Generation</span>
+                <span class="tab-badge" id="badge-bills-count">0</span>
+            </button>
+            <button class="portal-tab-btn" onclick="switchManagerTab('payment')">
+                <span>💰 Make Payment (POS)</span>
+                <span class="tab-badge" id="badge-unpaid-count">0</span>
+            </button>
+            <button class="portal-tab-btn" onclick="switchManagerTab('stock')">
+                <span>📊 Stock Report</span>
+                <span class="tab-badge" id="badge-manager-stock">0</span>
+            </button>
+        </div>
+
+        <!-- ================= TAB 1: TRACK ORDER (FEATURE #6) ================= -->
+        <section id="tab-track" class="tab-pane active">
+            <div class="portal-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Live Order Tracking & Service Flow</h2>
+                        <p>Real-time lifecycle of all dining and takeaway orders from table placement to service.</p>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-secondary-action" onclick="refreshOrders()">↻ Refresh</button>
+                    </div>
+                </div>
+
+                <!-- TOOLBAR & FILTERS -->
+                <div class="portal-toolbar">
+                    <div class="toolbar-search">
+                        <span>🔍</span>
+                        <input type="text" id="order-search-input" placeholder="Search order #, table or item..." oninput="filterOrders()">
+                    </div>
+
+                    <div class="toolbar-filters">
+                        <button class="filter-chip active" onclick="setOrderStatusFilter('All', this)">All Orders</button>
+                        <button class="filter-chip" onclick="setOrderStatusFilter('Pending', this)">Pending</button>
+                        <button class="filter-chip" onclick="setOrderStatusFilter('Preparing', this)">In Kitchen</button>
+                        <button class="filter-chip" onclick="setOrderStatusFilter('Ready', this)">Ready to Serve</button>
+                        <button class="filter-chip" onclick="setOrderStatusFilter('Completed', this)">Completed</button>
+                    </div>
+                </div>
+
+                <!-- ORDERS TABLE -->
+                <div class="portal-table-container">
+                    <table class="portal-table">
+                        <thead>
+                            <tr>
+                                <th>Order #</th>
+                                <th>Table / Guest</th>
+                                <th>Elapsed Time</th>
+                                <th>Station</th>
+                                <th>Ordered Items</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Service Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-table-body">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 2: BILL GENERATION (FEATURE #3) ================= -->
+        <section id="tab-billing" class="tab-pane">
+            <div class="portal-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Table Billing & Invoice Generation</h2>
+                        <p>Create itemized customer bills with automatic GST and service tax calculation.</p>
+                    </div>
+                    <button class="btn-primary-action" onclick="openNewBillModal()">
+                        <span>+ Generate New Bill</span>
+                    </button>
+                </div>
+
+                <!-- BILLS TABLE -->
+                <div class="portal-table-container">
+                    <table class="portal-table">
+                        <thead>
+                            <tr>
+                                <th>Bill #</th>
+                                <th>Order Ref</th>
+                                <th>Table</th>
+                                <th>Guest</th>
+                                <th>Items</th>
+                                <th>Total</th>
+                                <th>Payment Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="manager-bills-body">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 3: MAKE PAYMENT (FEATURE #8) ================= -->
+        <section id="tab-payment" class="tab-pane">
+            <div class="portal-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Counter POS & Payment Processing</h2>
+                        <p>Collect payments for dining tables via Cash, Card, or UPI and mark invoices as Paid.</p>
+                    </div>
+                </div>
+
+                <div class="pos-payment-grid">
+                    <!-- UNPAID INVOICES LIST -->
+                    <div>
+                        <h3 style="font-family: 'Playfair Display', serif; font-size: 20px; margin: 0 0 14px;">Select Bill to Settle</h3>
+                        <div id="unpaid-bills-list" class="unpaid-orders-list">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- PAYMENT CHECKOUT TERMINAL -->
+                    <div class="payment-checkout-card" id="payment-terminal-card">
+                        <div style="border-bottom: 1px solid #ede5db; padding-bottom: 14px; margin-bottom: 16px;">
+                            <span class="portal-role-badge badge-manager" style="font-size: 10px;">POS Cashier Terminal</span>
+                            <h3 id="checkout-bill-title" style="font-family: 'Playfair Display', serif; font-size: 22px; margin: 8px 0 4px;">Select a Bill</h3>
+                            <p id="checkout-bill-sub" style="font-size: 13px; color: #756d62; margin: 0;">Choose an unpaid bill from the left list to proceed.</p>
+                        </div>
+
+                        <div id="checkout-active-section" style="display: none;">
+                            <div style="background: #fffaf4; border: 1px solid #ded6c9; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 13px;">
+                                    <span>Bill Amount:</span>
+                                    <strong id="checkout-amount" style="font-size: 20px; color: #a65f42;">₹0</strong>
+                                </div>
+                                <div id="checkout-items-summary" style="font-size: 12px; color: #625b52; line-height: 1.5;"></div>
+                            </div>
+
+                            <label style="font-size: 13px; font-weight: 600; color: #3d3029;">Choose Payment Method:</label>
+                            <div class="payment-methods-selector">
+                                <div class="payment-method-chip active" onclick="selectPaymentMethod('Cash', this)">
+                                    <span class="method-icon">💵</span>
+                                    <span>Cash</span>
+                                </div>
+                                <div class="payment-method-chip" onclick="selectPaymentMethod('Card', this)">
+                                    <span class="method-icon">💳</span>
+                                    <span>Card</span>
+                                </div>
+                                <div class="payment-method-chip" onclick="selectPaymentMethod('UPI', this)">
+                                    <span class="method-icon">📱</span>
+                                    <span>UPI QR</span>
+                                </div>
+                            </div>
+
+                            <!-- CASH CHANGE CALCULATOR -->
+                            <div class="cash-calculator-box" id="cash-calc-box">
+                                <div class="calc-row">
+                                    <span style="font-size: 13px; font-weight: 500;">Cash Tendered by Customer:</span>
+                                    <input type="number" id="cash-tendered-input" class="calc-input" placeholder="₹0" oninput="calculateChange()">
+                                </div>
+                                <div class="calc-row" style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ded6c9;">
+                                    <span style="font-size: 14px; font-weight: 600;">Change to Return:</span>
+                                    <span class="change-amount" id="cash-change-display">₹0</span>
+                                </div>
+                            </div>
+
+                            <button type="button" class="btn-primary-action" style="width: 100%; justify-content: center; padding: 14px; font-size: 16px;" onclick="processManagerPayment()">
+                                ✓ Complete Payment & Issue Receipt
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 4: STOCK REPORT (FEATURE #7) ================= -->
+        <section id="tab-stock" class="tab-pane">
+            <div class="portal-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Inventory & Ingredient Stock Report</h2>
+                        <p>Monitor raw ingredient levels and send restocking purchase orders directly to Vendor.</p>
+                    </div>
+                    <button class="btn-primary-action" onclick="openOrderSuppliesModal()">
+                        <span>+ Order Supplies from Vendor</span>
+                    </button>
+                </div>
+
+                <!-- STOCK TOOLBAR -->
+                <div class="portal-toolbar">
+                    <div class="toolbar-search">
+                        <span>🔍</span>
+                        <input type="text" id="manager-stock-search" placeholder="Search stock inventory..." oninput="filterManagerStock()">
+                    </div>
+
+                    <div class="toolbar-filters">
+                        <button class="filter-chip active" onclick="setManagerStockFilter('All', this)">All</button>
+                        <button class="filter-chip" onclick="setManagerStockFilter('Low Stock', this)">Low Stock</button>
+                        <button class="filter-chip" onclick="setManagerStockFilter('Out of Stock', this)">Out of Stock</button>
+                        <button class="filter-chip" onclick="setManagerStockFilter('Produce', this)">Produce</button>
+                        <button class="filter-chip" onclick="setManagerStockFilter('Dairy', this)">Dairy</button>
+                    </div>
+                </div>
+
+                <!-- STOCK TABLE -->
+                <div class="portal-table-container">
+                    <table class="portal-table">
+                        <thead>
+                            <tr>
+                                <th>SKU</th>
+                                <th>Item Name</th>
+                                <th>Category</th>
+                                <th>Current Quantity</th>
+                                <th>Min Required</th>
+                                <th>Status</th>
+                                <th>Estimated Value</th>
+                                <th>Quick Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="manager-stock-body">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL: ORDER SUPPLIES FROM VENDOR -->
+    <div class="modal-overlay" id="supplies-modal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>Order Supplies from Vendor</h3>
+                <button type="button" class="modal-close-btn" onclick="closeSuppliesModal()">×</button>
+            </div>
+            <form id="supplies-form" onsubmit="handleSendRestockRequest(event)">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="supply-item-select">Select Ingredient / Item *</label>
+                        <select id="supply-item-select" class="form-control" required onchange="handleSupplyItemChange(this.value)">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="supply-quantity">Quantity Needed *</label>
+                            <input type="number" id="supply-quantity" class="form-control" placeholder="Quantity" min="1" step="0.5" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="supply-unit">Unit</label>
+                            <input type="text" id="supply-unit" class="form-control" readonly>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="supply-urgency">Delivery Urgency *</label>
+                            <select id="supply-urgency" class="form-control" required>
+                                <option value="Normal">Normal Delivery (1–2 days)</option>
+                                <option value="Urgent">Urgent / Express (Today)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="supply-requested-by">Requested By</label>
+                            <input type="text" id="supply-requested-by" class="form-control" value="Manager Marco" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="supply-notes">Order Notes / Supplier Instruction</label>
+                        <textarea id="supply-notes" class="form-control" rows="2" placeholder="e.g. Please deliver before evening rush hour."></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary-action" onclick="closeSuppliesModal()">Cancel</button>
+                    <button type="submit" class="btn-primary-action">Dispatch Order to Vendor</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: GENERATE NEW BILL -->
+    <div class="modal-overlay" id="bill-modal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>Generate Dining Bill</h3>
+                <button type="button" class="modal-close-btn" onclick="closeBillModal()">×</button>
+            </div>
+            <form id="bill-form" onsubmit="handleGenerateBill(event)">
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bill-table">Dining Table *</label>
+                            <select id="bill-table" class="form-control" required>
+                                <option value="Table 01">Table 01</option>
+                                <option value="Table 02">Table 02</option>
+                                <option value="Table 03">Table 03</option>
+                                <option value="Table 04">Table 04 (Customer App)</option>
+                                <option value="Table 05">Table 05</option>
+                                <option value="Table 07">Table 07</option>
+                                <option value="Takeaway Counter">Takeaway Counter</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="bill-guest">Guest Name</label>
+                            <input type="text" id="bill-guest" class="form-control" placeholder="Guest Name" value="Dining Guest">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Select Menu Items</label>
+                        <div id="bill-item-selector" style="max-height: 180px; overflow-y: auto; border: 1px solid #ded6c9; border-radius: 8px; padding: 10px; background: #fffaf4;">
+                            <!-- Populated with checkboxes & qty -->
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bill-discount">Discount (₹)</label>
+                            <input type="number" id="bill-discount" class="form-control" value="0" min="0" oninput="calculateBillTotals()">
+                        </div>
+                        <div class="form-group">
+                            <label for="bill-payment-status">Status</label>
+                            <select id="bill-payment-status" class="form-control">
+                                <option value="Unpaid">Unpaid</option>
+                                <option value="Paid">Paid</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="background: #fbf8f3; border: 1px solid #ded6c9; border-radius: 8px; padding: 14px; font-size: 13px;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom: 4px;">
+                            <span>Subtotal:</span>
+                            <strong id="bill-calc-subtotal">₹0</strong>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom: 4px;">
+                            <span>GST (5%):</span>
+                            <span id="bill-calc-tax">₹0</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom: 4px;">
+                            <span>Service Charge (5%):</span>
+                            <span id="bill-calc-service">₹0</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-top: 8px; padding-top: 8px; border-top: 1px dashed #ccc; font-size: 15px; font-weight: 700; color: #a65f42;">
+                            <span>Total Payable:</span>
+                            <span id="bill-calc-total">₹0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary-action" onclick="closeBillModal()">Cancel</button>
+                    <button type="submit" class="btn-primary-action">Save Bill</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: PRINTABLE RECEIPT -->
+    <div class="modal-overlay" id="receipt-modal">
+        <div class="modal-box" style="max-width: 460px;">
+            <div class="modal-header">
+                <h3>Official Invoice / Receipt</h3>
+                <button type="button" class="modal-close-btn" onclick="closeReceiptModal()">×</button>
+            </div>
+            <div class="modal-body" id="receipt-printable-content"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary-action" onclick="closeReceiptModal()">Close</button>
+                <button type="button" class="btn-primary-action" onclick="window.print()">🖨 Print</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- SCRIPTS -->
+    <script src="js/app-data.js"></script>
+    <script>
+        let currentOrderStatus = 'All';
+        let currentManagerStockFilter = 'All';
+        let selectedBillForPayment = null;
+        let selectedPaymentMethod = 'Cash';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            refreshManagerStats();
+            renderOrdersTable();
+            renderManagerBills();
+            renderUnpaidBillsList();
+            renderManagerStock();
+            updateLiveClock();
+            setInterval(updateLiveClock, 30000);
+        });
+
+        function updateLiveClock() {
+            const now = new Date();
+            document.getElementById('manager-live-clock').textContent = `Floor Service · ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+        }
+
+        function toggleRoleDropdown() {
+            document.getElementById('role-menu').classList.toggle('show');
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.closest('.role-switcher-dropdown')) {
+                const dropdowns = document.getElementsByClassName("role-dropdown-menu");
+                for (let i = 0; i < dropdowns.length; i++) {
+                    dropdowns[i].classList.remove('show');
+                }
+            }
+        };
+
+        function switchManagerTab(tabId) {
+            document.querySelectorAll('.portal-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+
+            const activeBtn = Array.from(document.querySelectorAll('.portal-tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+            if (activeBtn) activeBtn.classList.add('active');
+
+            const target = document.getElementById('tab-' + tabId);
+            if (target) target.classList.add('active');
+
+            if (tabId === 'track') renderOrdersTable();
+            if (tabId === 'billing') renderManagerBills();
+            if (tabId === 'payment') renderUnpaidBillsList();
+            if (tabId === 'stock') renderManagerStock();
+            refreshManagerStats();
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type === 'success' ? 'toast-success' : type === 'danger' ? 'toast-danger' : ''}`;
+            toast.innerHTML = `<span>${type === 'success' ? '✓' : type === 'danger' ? '✕' : '✦'}</span> <div>${message}</div>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        function refreshManagerStats() {
+            const orders = RAS.getOrders();
+            const bills = RAS.getBills();
+            const stock = RAS.getStock();
+
+            const activeOrders = orders.filter(o => o.status !== 'Completed' && o.status !== 'Rejected');
+            document.getElementById('stat-active-orders').textContent = activeOrders.length;
+            const inKitchen = orders.filter(o => o.status === 'Preparing').length;
+            document.getElementById('stat-orders-detail').textContent = `${inKitchen} Currently in Kitchen`;
+            document.getElementById('badge-track-count').textContent = activeOrders.length;
+
+            const unpaidBills = bills.filter(b => b.paymentStatus === 'Unpaid');
+            document.getElementById('stat-pending-bills').textContent = unpaidBills.length;
+            const uncollectedSum = unpaidBills.reduce((acc, b) => acc + b.total, 0);
+            document.getElementById('stat-unpaid-amount').textContent = `${RAS.formatCurrency(uncollectedSum)} Uncollected`;
+            document.getElementById('badge-unpaid-count').textContent = unpaidBills.length;
+            document.getElementById('badge-bills-count').textContent = bills.length;
+
+            const collectedSum = bills.filter(b => b.paymentStatus === 'Paid').reduce((acc, b) => acc + b.total, 0);
+            document.getElementById('stat-collected-revenue').textContent = RAS.formatCurrency(collectedSum);
+
+            const lowStockCount = stock.filter(s => s.status !== 'In Stock').length;
+            document.getElementById('stat-stock-status').textContent = lowStockCount;
+            document.getElementById('badge-manager-stock').textContent = lowStockCount;
+        }
+
+        /* 1. TRACK ORDER */
+        function renderOrdersTable() {
+            const orders = RAS.getOrders();
+            const tbody = document.getElementById('orders-table-body');
+            const searchVal = (document.getElementById('order-search-input').value || '').toLowerCase();
+            tbody.innerHTML = '';
+
+            const filtered = orders.filter(order => {
+                const matchStatus = currentOrderStatus === 'All' || order.status === currentOrderStatus;
+                const matchSearch = order.orderNumber.toLowerCase().includes(searchVal) ||
+                                    order.table.toLowerCase().includes(searchVal) ||
+                                    order.items.some(i => i.name.toLowerCase().includes(searchVal));
+                return matchStatus && matchSearch;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #756d62; padding: 30px;">No matching orders found.</td></tr>';
+                return;
+            }
+
+            filtered.forEach(order => {
+                const itemsSummary = order.items.map(i => `${i.name} × ${i.quantity}`).join(', ');
+                let badgeClass = 'badge-pending';
+                if (order.status === 'Preparing') badgeClass = 'badge-preparing';
+                if (order.status === 'Ready') badgeClass = 'badge-ready';
+                if (order.status === 'Completed') badgeClass = 'badge-completed';
+                if (order.status === 'Rejected') badgeClass = 'badge-rejected';
+
+                let actionHtml = '';
+                if (order.status === 'Pending') {
+                    actionHtml = `<button class="btn-icon-action" onclick="advanceOrderStatus('${order.orderNumber}', 'Preparing')">Send to Kitchen</button>`;
+                } else if (order.status === 'Preparing') {
+                    actionHtml = `<button class="btn-icon-action" onclick="advanceOrderStatus('${order.orderNumber}', 'Ready')">Mark Ready</button>`;
+                } else if (order.status === 'Ready') {
+                    actionHtml = `<button class="btn-primary-action" style="padding: 6px 12px; font-size: 12px;" onclick="advanceOrderStatus('${order.orderNumber}', 'Completed')">Mark Served</button>`;
+                } else {
+                    actionHtml = `<span style="font-size: 12px; color: #2e7d32;">✓ Fulfilled</span>`;
+                }
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${order.orderNumber}</strong></td>
+                        <td><strong>${order.table}</strong><br><small style="color:#756d62">${order.customerName}</small></td>
+                        <td><small style="color:#a65f42; font-weight:600;">${RAS.timeAgo(order.timestamp)}</small></td>
+                        <td><span style="font-size: 12px; background: #faf3eb; padding: 2px 8px; border-radius: 4px;">${order.station || 'Main Kitchen'}</span></td>
+                        <td style="max-width: 250px; font-size: 13px;">
+                            ${itemsSummary}
+                            ${order.notes ? `<div style="font-size: 11px; color: #b56214; margin-top: 3px;">Note: ${order.notes}</div>` : ''}
+                        </td>
+                        <td><strong>${RAS.formatCurrency(order.total)}</strong></td>
+                        <td><span class="status-badge ${badgeClass}">${order.status}</span></td>
+                        <td>${actionHtml}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function setOrderStatusFilter(status, buttonEl) {
+            currentOrderStatus = status;
+            document.querySelectorAll('#tab-track .filter-chip').forEach(btn => btn.classList.remove('active'));
+            buttonEl.classList.add('active');
+            renderOrdersTable();
+        }
+
+        function filterOrders() {
+            renderOrdersTable();
+        }
+
+        function refreshOrders() {
+            renderOrdersTable();
+            refreshManagerStats();
+            showToast('Orders list refreshed.', 'info');
+        }
+
+        function advanceOrderStatus(orderNumber, newStatus) {
+            const updated = RAS.updateOrderStatus(orderNumber, newStatus);
+            if (updated) {
+                showToast(`Order #${orderNumber} updated to "${newStatus}"!`, 'success');
+                renderOrdersTable();
+                refreshManagerStats();
+            }
+        }
+
+        /* 2. BILL GENERATION */
+        function renderManagerBills() {
+            const bills = RAS.getBills();
+            const tbody = document.getElementById('manager-bills-body');
+            tbody.innerHTML = '';
+
+            bills.forEach(bill => {
+                const itemsSummary = bill.items.map(i => `${i.name} (×${i.quantity})`).join(', ');
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${bill.billNumber}</strong></td>
+                        <td><small style="color:#756d62">${bill.orderNumber}</small></td>
+                        <td>${bill.table}</td>
+                        <td>${bill.customerName}</td>
+                        <td style="max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${itemsSummary}">${itemsSummary}</td>
+                        <td><strong>${RAS.formatCurrency(bill.total)}</strong></td>
+                        <td>
+                            <span class="status-badge ${bill.paymentStatus === 'Paid' ? 'badge-paid' : 'badge-unpaid'}">
+                                ${bill.paymentStatus}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn-icon-action" onclick="viewReceipt('${bill.billNumber}')">View Receipt</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function openNewBillModal() {
+            const menu = RAS.getMenu();
+            const selector = document.getElementById('bill-item-selector');
+            selector.innerHTML = '';
+
+            menu.forEach((item, index) => {
+                selector.innerHTML += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #ede5db;">
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; flex: 1;">
+                            <input type="checkbox" class="bill-item-checkbox" data-index="${index}" data-name="${item.name}" data-price="${item.price}" onchange="calculateBillTotals()">
+                            <span>${item.icon || '🍽'} ${item.name} (${RAS.formatCurrency(item.price)})</span>
+                        </label>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span style="font-size: 11px; color: #756d62;">Qty:</span>
+                            <input type="number" class="bill-item-qty" data-index="${index}" value="1" min="1" max="20" style="width: 50px; padding: 4px; border: 1px solid #ded6c9; border-radius: 4px; text-align: center;" onchange="calculateBillTotals()">
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('bill-discount').value = 0;
+            calculateBillTotals();
+            document.getElementById('bill-modal').classList.add('active');
+        }
+
+        function calculateBillTotals() {
+            const checkboxes = document.querySelectorAll('.bill-item-checkbox:checked');
+            let subtotal = 0;
+
+            checkboxes.forEach(cb => {
+                const idx = cb.getAttribute('data-index');
+                const price = parseFloat(cb.getAttribute('data-price'));
+                const qtyInput = document.querySelector(`.bill-item-qty[data-index="${idx}"]`);
+                const qty = qtyInput ? parseInt(qtyInput.value) || 1 : 1;
+                subtotal += price * qty;
+            });
+
+            const discount = parseFloat(document.getElementById('bill-discount').value) || 0;
+            const taxable = Math.max(0, subtotal - discount);
+            const taxGst = taxable * 0.05;
+            const serviceCharge = taxable * 0.05;
+            const total = taxable + taxGst + serviceCharge;
+
+            document.getElementById('bill-calc-subtotal').textContent = RAS.formatCurrency(subtotal);
+            document.getElementById('bill-calc-tax').textContent = RAS.formatCurrency(taxGst);
+            document.getElementById('bill-calc-service').textContent = RAS.formatCurrency(serviceCharge);
+            document.getElementById('bill-calc-total').textContent = RAS.formatCurrency(total);
+
+            return { subtotal, discount, taxGst, serviceCharge, total };
+        }
+
+        function handleGenerateBill(e) {
+            e.preventDefault();
+            const checkboxes = document.querySelectorAll('.bill-item-checkbox:checked');
+            if (checkboxes.length === 0) {
+                alert('Please select items for this bill.');
+                return;
+            }
+
+            const items = [];
+            checkboxes.forEach(cb => {
+                const idx = cb.getAttribute('data-index');
+                const name = cb.getAttribute('data-name');
+                const price = parseFloat(cb.getAttribute('data-price'));
+                const qtyInput = document.querySelector(`.bill-item-qty[data-index="${idx}"]`);
+                const quantity = qtyInput ? parseInt(qtyInput.value) || 1 : 1;
+                items.push({ name, price, quantity });
+            });
+
+            const totals = calculateBillTotals();
+            const table = document.getElementById('bill-table').value;
+            const guest = document.getElementById('bill-guest').value.trim() || 'Guest Diner';
+            const status = document.getElementById('bill-payment-status').value;
+
+            const newBill = RAS.createBill({
+                table: table,
+                customerName: guest,
+                items: items,
+                subtotal: totals.subtotal,
+                discount: totals.discount,
+                taxGst: totals.taxGst,
+                serviceCharge: totals.serviceCharge,
+                total: totals.total,
+                paymentStatus: status,
+                paymentMethod: status === 'Paid' ? 'Counter Cash' : 'Pending'
+            });
+
+            closeBillModal();
+            showToast(`Bill #${newBill.billNumber} created!`, 'success');
+            renderManagerBills();
+            renderUnpaidBillsList();
+            refreshManagerStats();
+            viewReceipt(newBill.billNumber);
+        }
+
+        function closeBillModal() {
+            document.getElementById('bill-modal').classList.remove('active');
+        }
+
+        function viewReceipt(billNumber) {
+            const bills = RAS.getBills();
+            const bill = bills.find(b => b.billNumber === billNumber);
+            if (!bill) return;
+
+            document.getElementById('receipt-printable-content').innerHTML = `
+                <div class="receipt-sheet printable-area">
+                    <div class="receipt-header">
+                        <h2>LA TAVOLA</h2>
+                        <p>Authentic Italian Restaurant</p>
+                        <p>Kolkata, West Bengal · GSTIN: 19AABCL8294K1Z3</p>
+                    </div>
+
+                    <div class="receipt-meta">
+                        <div style="display:flex; justify-content:space-between;">
+                            <span><strong>INVOICE:</strong> ${bill.billNumber}</span>
+                            <span><strong>DATE:</strong> ${bill.date}</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-top: 4px;">
+                            <span><strong>TABLE:</strong> ${bill.table}</span>
+                            <span><strong>GUEST:</strong> ${bill.customerName}</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-top: 4px;">
+                            <span><strong>STATUS:</strong> ${bill.paymentStatus}</span>
+                            <span><strong>METHOD:</strong> ${bill.paymentMethod}</span>
+                        </div>
+                    </div>
+
+                    <table class="receipt-table">
+                        <thead>
+                            <tr><th>Item</th><th style="text-align:center;">Qty</th><th style="text-align:right;">Price</th><th style="text-align:right;">Total</th></tr>
+                        </thead>
+                        <tbody>
+                            ${bill.items.map(i => `
+                                <tr>
+                                    <td>${i.name}</td>
+                                    <td style="text-align:center;">${i.quantity}</td>
+                                    <td style="text-align:right;">₹${i.price}</td>
+                                    <td style="text-align:right;">₹${i.price * i.quantity}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+
+                    <div class="receipt-totals">
+                        <div class="receipt-totals-row">
+                            <span>Subtotal</span>
+                            <span>${RAS.formatCurrency(bill.subtotal)}</span>
+                        </div>
+                        ${bill.discount > 0 ? `
+                            <div class="receipt-totals-row" style="color: #2e7d32;">
+                                <span>Discount</span>
+                                <span>-${RAS.formatCurrency(bill.discount)}</span>
+                            </div>
+                        ` : ''}
+                        <div class="receipt-totals-row">
+                            <span>GST (5%)</span>
+                            <span>${RAS.formatCurrency(bill.taxGst)}</span>
+                        </div>
+                        <div class="receipt-totals-row">
+                            <span>Service Charge (5%)</span>
+                            <span>${RAS.formatCurrency(bill.serviceCharge)}</span>
+                        </div>
+                        <div class="receipt-totals-row grand-total">
+                            <span>Total Due</span>
+                            <span>${RAS.formatCurrency(bill.total)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('receipt-modal').classList.add('active');
+        }
+
+        function closeReceiptModal() {
+            document.getElementById('receipt-modal').classList.remove('active');
+        }
+
+        /* 3. MAKE PAYMENT (FEATURE #8) */
+        function renderUnpaidBillsList() {
+            const bills = RAS.getBills();
+            const unpaid = bills.filter(b => b.paymentStatus === 'Unpaid');
+            const container = document.getElementById('unpaid-bills-list');
+            container.innerHTML = '';
+
+            if (unpaid.length === 0) {
+                container.innerHTML = '<p style="color: #2e7d32; padding: 20px; text-align: center; background: #e8f5e9; border-radius: 8px;">✓ All bills are currently settled!</p>';
+                document.getElementById('checkout-active-section').style.display = 'none';
+                document.getElementById('checkout-bill-title').textContent = 'No Unpaid Bills';
+                document.getElementById('checkout-bill-sub').textContent = 'All restaurant tables have settled their checks.';
+                return;
+            }
+
+            unpaid.forEach(bill => {
+                const isSelected = selectedBillForPayment && selectedBillForPayment.billNumber === bill.billNumber;
+                container.innerHTML += `
+                    <div class="unpaid-order-item ${isSelected ? 'selected' : ''}" onclick="selectBillForPayment('${bill.billNumber}')">
+                        <div>
+                            <div style="font-weight: 700; color: #2d2822;">${bill.table} · ${bill.billNumber}</div>
+                            <div style="font-size: 12px; color: #756d62;">${bill.customerName} · ${bill.items.length} items</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-weight: 700; font-size: 17px; color: #a65f42;">${RAS.formatCurrency(bill.total)}</div>
+                            <span class="status-badge badge-unpaid" style="font-size: 10px;">Unpaid</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            if (!selectedBillForPayment && unpaid.length > 0) {
+                selectBillForPayment(unpaid[0].billNumber);
+            }
+        }
+
+        function selectBillForPayment(billNumber) {
+            const bills = RAS.getBills();
+            selectedBillForPayment = bills.find(b => b.billNumber === billNumber);
+            if (!selectedBillForPayment) return;
+
+            document.querySelectorAll('.unpaid-order-item').forEach(el => el.classList.remove('selected'));
+            const activeEl = Array.from(document.querySelectorAll('.unpaid-order-item')).find(el => el.textContent.includes(billNumber));
+            if (activeEl) activeEl.classList.add('selected');
+
+            document.getElementById('checkout-bill-title').textContent = `${selectedBillForPayment.table} (${selectedBillForPayment.billNumber})`;
+            document.getElementById('checkout-bill-sub').textContent = `Guest: ${selectedBillForPayment.customerName} · ${selectedBillForPayment.date}`;
+            document.getElementById('checkout-amount').textContent = RAS.formatCurrency(selectedBillForPayment.total);
+            document.getElementById('checkout-items-summary').innerHTML = selectedBillForPayment.items.map(i => `${i.name} (×${i.quantity})`).join(', ');
+
+            document.getElementById('checkout-active-section').style.display = 'block';
+            document.getElementById('cash-tendered-input').value = selectedBillForPayment.total;
+            calculateChange();
+        }
+
+        function selectPaymentMethod(method, element) {
+            selectedPaymentMethod = method;
+            document.querySelectorAll('.payment-method-chip').forEach(c => c.classList.remove('active'));
+            element.classList.add('active');
+
+            const cashBox = document.getElementById('cash-calc-box');
+            if (method === 'Cash') {
+                cashBox.style.display = 'block';
+                calculateChange();
+            } else {
+                cashBox.style.display = 'none';
+            }
+        }
+
+        function calculateChange() {
+            if (!selectedBillForPayment) return;
+            const tendered = parseFloat(document.getElementById('cash-tendered-input').value) || 0;
+            const total = selectedBillForPayment.total;
+            const change = tendered - total;
+
+            const changeEl = document.getElementById('cash-change-display');
+            if (change < 0) {
+                changeEl.textContent = `Need ${RAS.formatCurrency(Math.abs(change))} more`;
+                changeEl.style.color = '#c62828';
+            } else {
+                changeEl.textContent = RAS.formatCurrency(change);
+                changeEl.style.color = '#2e7d32';
+            }
+        }
+
+        function processManagerPayment() {
+            if (!selectedBillForPayment) return;
+
+            if (selectedPaymentMethod === 'Cash') {
+                const tendered = parseFloat(document.getElementById('cash-tendered-input').value) || 0;
+                if (tendered < selectedBillForPayment.total) {
+                    alert('Amount tendered is less than the total bill amount.');
+                    return;
+                }
+            }
+
+            const paidBill = RAS.markBillPaid(selectedBillForPayment.billNumber, `Manager POS (${selectedPaymentMethod})`);
+            if (paidBill) {
+                showToast(`Payment of ${RAS.formatCurrency(paidBill.total)} collected for ${paidBill.table}!`, 'success');
+                selectedBillForPayment = null;
+                renderUnpaidBillsList();
+                renderManagerBills();
+                renderOrdersTable();
+                refreshManagerStats();
+                viewReceipt(paidBill.billNumber);
+            }
+        }
+
+        /* 4. STOCK REPORT */
+        function renderManagerStock() {
+            const stock = RAS.getStock();
+            const tbody = document.getElementById('manager-stock-body');
+            const searchVal = (document.getElementById('manager-stock-search').value || '').toLowerCase();
+            tbody.innerHTML = '';
+
+            const filtered = stock.filter(item => {
+                let matchFilter = true;
+                if (currentManagerStockFilter === 'Low Stock') matchFilter = item.status === 'Low Stock';
+                else if (currentManagerStockFilter === 'Out of Stock') matchFilter = item.status === 'Out of Stock';
+                else if (currentManagerStockFilter !== 'All') matchFilter = item.category === currentManagerStockFilter;
+
+                const matchSearch = item.name.toLowerCase().includes(searchVal) || item.category.toLowerCase().includes(searchVal);
+                return matchFilter && matchSearch;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #756d62; padding: 30px;">No inventory records found.</td></tr>';
+                return;
+            }
+
+            filtered.forEach(item => {
+                const badgeClass = item.status === 'In Stock' ? 'badge-in-stock' : item.status === 'Low Stock' ? 'badge-low-stock' : 'badge-out-of-stock';
+                const totalVal = item.quantity * item.unitCost;
+                tbody.innerHTML += `
+                    <tr>
+                        <td><code>${item.id}</code></td>
+                        <td><strong>${item.name}</strong></td>
+                        <td><span style="font-size: 12px; background: #faf3eb; padding: 2px 8px; border-radius: 4px;">${item.category}</span></td>
+                        <td><strong>${item.quantity} ${item.unit}</strong></td>
+                        <td style="color: #756d62;">${item.minThreshold} ${item.unit}</td>
+                        <td><span class="status-badge ${badgeClass}">${item.status}</span></td>
+                        <td>${RAS.formatCurrency(totalVal)}</td>
+                        <td>
+                            <button class="btn-icon-action" onclick="quickOrderSupply('${item.id}')">+ Order</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function setManagerStockFilter(filter, buttonEl) {
+            currentManagerStockFilter = filter;
+            document.querySelectorAll('#tab-stock .filter-chip').forEach(btn => btn.classList.remove('active'));
+            buttonEl.classList.add('active');
+            renderManagerStock();
+        }
+
+        function filterManagerStock() {
+            renderManagerStock();
+        }
+
+        function openOrderSuppliesModal() {
+            const stock = RAS.getStock();
+            const select = document.getElementById('supply-item-select');
+            select.innerHTML = '<option value="">-- Choose Ingredient / Supply --</option>';
+
+            stock.forEach(item => {
+                select.innerHTML += `<option value="${item.id}" data-unit="${item.unit}" data-name="${item.name}">${item.name} (Current: ${item.quantity} ${item.unit})</option>`;
+            });
+
+            document.getElementById('supplies-modal').classList.add('active');
+        }
+
+        function quickOrderSupply(itemId) {
+            openOrderSuppliesModal();
+            const select = document.getElementById('supply-item-select');
+            select.value = itemId;
+            handleSupplyItemChange(itemId);
+        }
+
+        function handleSupplyItemChange(itemId) {
+            const stock = RAS.getStock();
+            const item = stock.find(s => s.id === itemId);
+            if (item) {
+                document.getElementById('supply-unit').value = item.unit;
+                document.getElementById('supply-quantity').value = Math.max(1, item.minThreshold * 2);
+            }
+        }
+
+        function closeSuppliesModal() {
+            document.getElementById('supplies-modal').classList.remove('active');
+        }
+
+        function handleSendRestockRequest(e) {
+            e.preventDefault();
+            const select = document.getElementById('supply-item-select');
+            const itemId = select.value;
+            const stock = RAS.getStock();
+            const item = stock.find(s => s.id === itemId);
+
+            const req = RAS.createStockRequest({
+                itemId: itemId,
+                itemName: item ? item.name : select.options[select.selectedIndex].text,
+                quantity: parseFloat(document.getElementById('supply-quantity').value),
+                unit: document.getElementById('supply-unit').value,
+                requestedBy: document.getElementById('supply-requested-by').value,
+                urgency: document.getElementById('supply-urgency').value,
+                notes: document.getElementById('supply-notes').value
+            });
+
+            closeSuppliesModal();
+            showToast(`Purchase request #${req.id} sent to Vendor successfully!`, 'success');
+            refreshManagerStats();
+        }
+    </script>
+</body>
+
+</html>

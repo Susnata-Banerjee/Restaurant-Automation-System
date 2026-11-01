@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Track Order | La Tavola</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+
+    <nav class="navbar">
+
+        <div class="logo">
+            LA TAVOLA
+            <span>RESTAURANT</span>
+        </div>
+
+        <div class="nav-links">
+
+            <a href="index.html">Home</a>
+            <a href="customer.html">My Account</a>
+            <a href="customer.html">Back</a>
+
+        </div>
+
+    </nav>
+
+
+    <!-- TRACK ORDER -->
+
+    <main class="track-page">
+
+        <div class="track-header">
+
+            <p class="section-label">
+                ORDER TRACKING
+            </p>
+
+            <h1>
+                Your order is on its way.
+            </h1>
+
+            <p>
+                Follow your order as it moves through our kitchen.
+            </p>
+
+        </div>
+
+
+        <!-- ORDER CARD -->
+
+        <div class="track-card">
+
+            <div class="track-card-top">
+
+                <div>
+
+                    <p class="track-small">
+                        YOUR ORDER
+                    </p>
+
+                    <h2 id="order-number">
+                        ORDER #LT2026-1042
+                    </h2>
+
+                </div>
+
+                <span class="order-status" id="order-status-badge">
+                    PENDING
+                </span>
+
+            </div>
+
+
+            <!-- TIMELINE -->
+
+            <div class="order-timeline" id="order-timeline">
+
+                <div class="timeline-step completed" id="step-1">
+
+                    <div class="timeline-dot">
+                        ✓
+                    </div>
+
+                    <div>
+                        <strong>Order Placed</strong>
+                        <p>Your order has been received.</p>
+                    </div>
+
+                </div>
+
+
+                <div class="timeline-step active" id="step-2">
+
+                    <div class="timeline-dot">
+                        ✦
+                    </div>
+
+                    <div>
+                        <strong>Order Confirmed</strong>
+                        <p>The kitchen is reviewing your order.</p>
+                    </div>
+
+                </div>
+
+
+                <div class="timeline-step" id="step-3">
+
+                    <div class="timeline-dot">
+                        3
+                    </div>
+
+                    <div>
+                        <strong>Preparing Your Food</strong>
+                        <p>Your food is currently being cooked.</p>
+                    </div>
+
+                </div>
+
+
+                <div class="timeline-step" id="step-4">
+
+                    <div class="timeline-dot">
+                        4
+                    </div>
+
+                    <div>
+                        <strong>Ready to Serve</strong>
+                        <p>Your order is plated and ready.</p>
+                    </div>
+
+                </div>
+
+
+                <div class="timeline-step" id="step-5">
+
+                    <div class="timeline-dot">
+                        5
+                    </div>
+
+                    <div>
+                        <strong>Completed</strong>
+                        <p>Enjoy your meal!</p>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ORDER DETAILS -->
+
+            <div class="track-details">
+
+                <div class="details-heading">
+
+                    <h3>
+                        Order Details
+                    </h3>
+
+                </div>
+
+
+                <!-- ACTUAL ORDER WILL APPEAR HERE -->
+
+                <div
+                    class="track-order-items"
+                    id="tracked-items">
+
+                </div>
+
+
+                <div class="track-total">
+
+                    <span>
+                        Total
+                    </span>
+
+                    <strong id="tracked-total">
+                        ₹0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- ESTIMATED TIME -->
+
+            <div class="estimated-time">
+
+                <div class="time-icon">
+                    ◷
+                </div>
+
+                <div>
+
+                    <strong>
+                        Estimated preparation time
+                    </strong>
+
+                    <p>
+                        15–20 minutes
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- BACK BUTTON -->
+
+        <div class="track-back">
+
+            <a href="customer.html">
+                ← Back to Customer Dashboard
+            </a>
+
+        </div>
+
+    </main>
+
+
+    <!-- FOOTER -->
+
+    <footer class="footer">
+
+        <div>
+
+            <strong>
+                LA TAVOLA
+            </strong>
+
+            <p>
+                A taste worth remembering.
+            </p>
+
+        </div>
+
+        <div>
+
+            <p>
+                Kolkata, West Bengal
+            </p>
+
+            <p>
+                Open daily · 11:00 AM – 11:00 PM
+            </p>
+
+        </div>
+
+    </footer>
+
+
+    <!-- JAVASCRIPT -->
+
+    <script src="js/app-data.js"></script>
+    <script>
+
+        function refreshTrackedOrder() {
+            let savedOrder = localStorage.getItem("laTavolaOrder");
+            if (!savedOrder) {
+                document.getElementById("tracked-items").innerHTML = `
+                    <p>No active order found. Explore our menu to place an order!</p>
+                `;
+                return;
+            }
+
+            const orderData = JSON.parse(savedOrder);
+
+            /* Check if orders in RAS has a more recent status */
+            if (window.RAS) {
+                const liveOrders = RAS.getOrders();
+                const matched = liveOrders.find(o => o.orderNumber === orderData.orderNumber);
+                if (matched && matched.status) {
+                    orderData.status = matched.status;
+                    if (matched.rejectReason) orderData.rejectReason = matched.rejectReason;
+                }
+            }
+
+            /* ORDER NUMBER */
+            document.getElementById("order-number").textContent =
+                `ORDER #${orderData.orderNumber}`;
+
+            /* STATUS BADGE */
+            const statusBadge = document.getElementById("order-status-badge");
+            const currentStatus = orderData.status || "Pending";
+            statusBadge.textContent = currentStatus.toUpperCase();
+
+            /* UPDATE TIMELINE STEPS */
+            const s1 = document.getElementById("step-1");
+            const s2 = document.getElementById("step-2");
+            const s3 = document.getElementById("step-3");
+            const s4 = document.getElementById("step-4");
+            const s5 = document.getElementById("step-5");
+
+            [s1, s2, s3, s4, s5].forEach(s => {
+                if (s) { s.className = "timeline-step"; }
+            });
+
+            if (currentStatus === "Pending") {
+                s1.className = "timeline-step completed";
+                s2.className = "timeline-step active";
+                statusBadge.style.background = "#fff8e1";
+                statusBadge.style.color = "#b78103";
+            } else if (currentStatus === "Preparing") {
+                s1.className = "timeline-step completed";
+                s2.className = "timeline-step completed";
+                s3.className = "timeline-step active";
+                statusBadge.style.background = "#e3f2fd";
+                statusBadge.style.color = "#1565c0";
+            } else if (currentStatus === "Ready") {
+                s1.className = "timeline-step completed";
+                s2.className = "timeline-step completed";
+                s3.className = "timeline-step completed";
+                s4.className = "timeline-step active";
+                statusBadge.style.background = "#e8f5e9";
+                statusBadge.style.color = "#2e7d32";
+            } else if (currentStatus === "Completed") {
+                [s1, s2, s3, s4, s5].forEach(s => s.className = "timeline-step completed");
+                statusBadge.style.background = "#e8f5e9";
+                statusBadge.style.color = "#2e7d32";
+            } else if (currentStatus === "Rejected") {
+                s1.className = "timeline-step completed";
+                statusBadge.textContent = "REJECTED";
+                statusBadge.style.background = "#ffebee";
+                statusBadge.style.color = "#c62828";
+                if (orderData.rejectReason) {
+                    s2.innerHTML = `
+                        <div class="timeline-dot" style="background:#c62828; color:#fff;">✕</div>
+                        <div>
+                            <strong style="color:#c62828;">Order Rejected by Kitchen</strong>
+                            <p>Reason: ${orderData.rejectReason}</p>
+                        </div>
+                    `;
+                }
+            }
+
+            /* ORDER ITEMS */
+            const trackedItems = document.getElementById("tracked-items");
+            trackedItems.innerHTML = "";
+
+            if (orderData.items && orderData.items.length > 0) {
+                orderData.items.forEach(item => {
+                    trackedItems.innerHTML += `
+                        <div class="tracked-item">
+                            <span>
+                                ${item.name} × ${item.quantity}
+                            </span>
+                            <strong>
+                                ₹${item.price * item.quantity}
+                            </strong>
+                        </div>
+                    `;
+                });
+            }
+
+            /* TOTAL */
+            document.getElementById("tracked-total").textContent =
+                `₹${(orderData.total || 0).toFixed(0)}`;
+        }
+
+        refreshTrackedOrder();
+        setInterval(refreshTrackedOrder, 5000); // Live poll updates from kitchen
+
+    </script>
+
+</body>
+
+</html>

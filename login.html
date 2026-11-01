@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Login | La Tavola</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="login-page">
+
+    <!-- NAVBAR -->
+    <header class="navbar login-navbar">
+
+        <div class="logo">
+            <span>LA TAVOLA</span>
+            <small>RESTAURANT</small>
+        </div>
+
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="index.html#menu">Menu</a>
+            <a href="index.html#about">About</a>
+            <a href="index.html#contact">Contact</a>
+        </nav>
+
+    </header>
+
+
+    <!-- LOGIN SECTION -->
+    <main class="login-container">
+
+        <div class="login-intro">
+
+            <p class="eyebrow">WELCOME BACK</p>
+
+            <h1>
+                Good food is<br>
+                waiting for you.
+            </h1>
+
+            <p class="login-description">
+                Sign in with your phone number and password to access customer ordering or restaurant operations.
+            </p>
+
+        </div>
+
+
+        <div class="login-card">
+
+            <div class="login-card-header">
+
+                <span class="login-icon">✦</span>
+
+                <h2>Sign In</h2>
+
+                <p id="login-header-sub">Enter your phone number & password</p>
+
+            </div>
+
+            <!-- TABS: CUSTOMER / STAFF -->
+            <div class="login-tabs-container">
+                <button type="button" class="login-tab-pill active" id="tab-customer-btn" onclick="switchLoginTab('customer')">
+                    <span>♡ Customer</span>
+                </button>
+                <button type="button" class="login-tab-pill" id="tab-staff-btn" onclick="switchLoginTab('staff')">
+                    <span>✦ Staff Portal</span>
+                </button>
+            </div>
+
+            <!-- ALERT BANNER -->
+            <div id="login-alert" class="login-alert-banner"></div>
+
+            <!-- ================= CUSTOMER LOGIN FORM ================= -->
+            <form id="customer-login-form" class="login-form" onsubmit="handleCustomerLogin(event)">
+
+                <!-- PHONE NUMBER -->
+                <div class="login-field-group">
+                    <label for="cust-phone" class="login-field-label">Phone Number</label>
+                    <div class="phone-field-wrapper">
+                        <div class="country-code-pill">
+                            <span>🇮🇳</span>
+                            <span>+91</span>
+                        </div>
+                        <input type="tel" id="cust-phone" class="phone-text-input" placeholder="Enter 10-digit mobile number" maxlength="10" autocomplete="tel" required>
+                    </div>
+                </div>
+
+                <!-- PASSWORD -->
+                <div class="login-field-group">
+                    <label for="cust-password" class="login-field-label">Password</label>
+                    <div class="password-field-wrapper">
+                        <input type="password" id="cust-password" class="password-text-input" placeholder="Enter your password" required autocomplete="current-password">
+                        <button type="button" class="password-reveal-btn" onclick="togglePasswordVisibility('cust-password', this)" title="Show/Hide Password">👁️</button>
+                    </div>
+                </div>
+
+                <!-- OPTIONS ROW -->
+                <div class="login-options-row">
+                    <label>
+                        <input type="checkbox" id="cust-remember" checked>
+                        <span>Remember me</span>
+                    </label>
+                    <a href="javascript:void(0)" onclick="handleForgotPassword('customer')">Forgot password?</a>
+                </div>
+
+                <!-- SUBMIT BUTTON -->
+                <button type="submit" class="login-submit-btn" id="cust-submit-btn">
+                    <span>Sign In as Customer</span>
+                    <span>→</span>
+                </button>
+
+                <!-- DEMO QUICK FILL -->
+                <div class="login-demo-box">
+                    <strong>Quick Test Credentials:</strong>
+                    <span>Phone: <code>9876543210</code> · Pass: <code>customer123</code></span><br>
+                    <button type="button" class="demo-fill-btn" onclick="fillCustomerDemo()">⚡ Fill Demo Customer</button>
+                </div>
+
+            </form>
+
+
+            <!-- ================= STAFF LOGIN FORM ================= -->
+            <form id="staff-login-form" class="login-form" style="display: none;" onsubmit="handleStaffLogin(event)">
+
+                <!-- STAFF ROLE SELECTOR CHIPS -->
+                <label class="login-field-label">Select Staff Role</label>
+                <div class="role-selector-chips">
+                    <div class="role-chip-btn active" data-role="Owner" onclick="selectStaffRole('Owner', this)">
+                        <span>♜</span>
+                        <small>Owner</small>
+                    </div>
+                    <div class="role-chip-btn" data-role="Manager" onclick="selectStaffRole('Manager', this)">
+                        <span>◫</span>
+                        <small>Manager</small>
+                    </div>
+                    <div class="role-chip-btn" data-role="Chef" onclick="selectStaffRole('Chef', this)">
+                        <span>♨</span>
+                        <small>Chef</small>
+                    </div>
+                    <div class="role-chip-btn" data-role="Vendor" onclick="selectStaffRole('Vendor', this)">
+                        <span>◈</span>
+                        <small>Vendor</small>
+                    </div>
+                </div>
+
+                <!-- PHONE NUMBER -->
+                <div class="login-field-group">
+                    <label for="staff-phone" class="login-field-label">Staff Registered Phone</label>
+                    <div class="phone-field-wrapper">
+                        <div class="country-code-pill">
+                            <span>🇮🇳</span>
+                            <span>+91</span>
+                        </div>
+                        <input type="tel" id="staff-phone" class="phone-text-input" placeholder="Staff 10-digit number" maxlength="10" autocomplete="tel" required>
+                    </div>
+                </div>
+
+                <!-- PASSWORD / PIN -->
+                <div class="login-field-group">
+                    <label for="staff-password" class="login-field-label">Staff Security Password / PIN</label>
+                    <div class="password-field-wrapper">
+                        <input type="password" id="staff-password" class="password-text-input" placeholder="Enter staff password" required autocomplete="current-password">
+                        <button type="button" class="password-reveal-btn" onclick="togglePasswordVisibility('staff-password', this)" title="Show/Hide Password">👁️</button>
+                    </div>
+                </div>
+
+                <!-- OPTIONS ROW -->
+                <div class="login-options-row">
+                    <label>
+                        <input type="checkbox" id="staff-remember" checked>
+                        <span>Keep logged in</span>
+                    </label>
+                    <a href="staff-role.html" style="font-size: 12px;">Browse Roles Directory</a>
+                </div>
+
+                <!-- SUBMIT BUTTON -->
+                <button type="submit" class="login-submit-btn" id="staff-submit-btn">
+                    <span id="staff-btn-text">Sign In as Owner</span>
+                    <span>→</span>
+                </button>
+
+                <!-- DEMO QUICK FILL -->
+                <div class="login-demo-box">
+                    <strong>Demo Staff Credentials:</strong>
+                    <div id="staff-demo-hint" style="margin-top: 2px;">Owner: <code>9830011223</code> · <code>owner123</code></div>
+                    <button type="button" class="demo-fill-btn" onclick="fillStaffDemo()">⚡ Auto-fill for Selected Role</button>
+                </div>
+
+            </form>
+
+
+            <div class="login-divider">
+                <span>LA TAVOLA</span>
+            </div>
+
+
+            <a href="index.html" class="back-home">
+                ← Back to restaurant
+            </a>
+
+        </div>
+
+    </main>
+
+
+    <!-- FOOTER -->
+    <footer class="login-footer">
+        <p>© 2026 La Tavola · Kolkata, West Bengal</p>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script src="js/app-data.js"></script>
+    <script>
+        let selectedStaffRole = 'Owner';
+
+        const STAFF_CREDENTIALS = {
+            'Owner': { phone: '9830011223', pass: 'owner123', label: 'Owner: 9830011223 · owner123' },
+            'Manager': { phone: '9830022334', pass: 'manager123', label: 'Manager: 9830022334 · manager123' },
+            'Chef': { phone: '9830033445', pass: 'chef123', label: 'Chef: 9830033445 · chef123' },
+            'Vendor': { phone: '9830044556', pass: 'vendor123', label: 'Vendor: 9830044556 · vendor123' }
+        };
+
+        function switchLoginTab(type) {
+            hideAlert();
+            const custBtn = document.getElementById('tab-customer-btn');
+            const staffBtn = document.getElementById('tab-staff-btn');
+            const custForm = document.getElementById('customer-login-form');
+            const staffForm = document.getElementById('staff-login-form');
+            const subTitle = document.getElementById('login-header-sub');
+
+            if (type === 'customer') {
+                custBtn.classList.add('active');
+                staffBtn.classList.remove('active');
+                custForm.style.display = 'block';
+                staffForm.style.display = 'none';
+                subTitle.textContent = 'Sign in to order food, track orders & pay bills';
+            } else {
+                staffBtn.classList.add('active');
+                custBtn.classList.remove('active');
+                staffForm.style.display = 'block';
+                custForm.style.display = 'none';
+                subTitle.textContent = `Sign in to access ${selectedStaffRole} portal`;
+            }
+        }
+
+        function selectStaffRole(role, element) {
+            selectedStaffRole = role;
+            document.querySelectorAll('.role-chip-btn').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+            document.getElementById('staff-btn-text').textContent = `Sign In as ${role}`;
+            document.getElementById('login-header-sub').textContent = `Sign in to access ${role} portal`;
+            document.getElementById('staff-demo-hint').innerHTML = `<code>${STAFF_CREDENTIALS[role].label}</code>`;
+        }
+
+        function togglePasswordVisibility(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.textContent = '🔒';
+            } else {
+                input.type = 'password';
+                btn.textContent = '👁️';
+            }
+        }
+
+        function showAlert(msg, isError = true) {
+            const alertBox = document.getElementById('login-alert');
+            alertBox.className = `login-alert-banner ${isError ? 'error' : 'success'}`;
+            alertBox.innerHTML = `<span>${isError ? '✕' : '✓'}</span> <div>${msg}</div>`;
+        }
+
+        function hideAlert() {
+            const alertBox = document.getElementById('login-alert');
+            alertBox.style.display = 'none';
+        }
+
+        function fillCustomerDemo() {
+            document.getElementById('cust-phone').value = '9876543210';
+            document.getElementById('cust-password').value = 'customer123';
+            hideAlert();
+        }
+
+        function fillStaffDemo() {
+            const cred = STAFF_CREDENTIALS[selectedStaffRole];
+            document.getElementById('staff-phone').value = cred.phone;
+            document.getElementById('staff-password').value = cred.pass;
+            hideAlert();
+        }
+
+        function handleCustomerLogin(e) {
+            e.preventDefault();
+            const phone = document.getElementById('cust-phone').value.trim();
+            const pass = document.getElementById('cust-password').value;
+
+            if (window.RAS) {
+                const result = RAS.authenticateCustomer(phone, pass);
+                if (result.success) {
+                    showAlert('Signed in successfully! Redirecting to customer dashboard...', false);
+                    document.getElementById('cust-submit-btn').disabled = true;
+                    setTimeout(() => {
+                        window.location.href = result.redirect;
+                    }, 600);
+                } else {
+                    showAlert(result.message, true);
+                }
+            } else {
+                // Fallback basic validation
+                if (phone.length === 10 && pass.length >= 3) {
+                    window.location.href = 'customer.html';
+                } else {
+                    showAlert('Please enter a valid 10-digit phone number and password.', true);
+                }
+            }
+        }
+
+        function handleStaffLogin(e) {
+            e.preventDefault();
+            const phone = document.getElementById('staff-phone').value.trim();
+            const pass = document.getElementById('staff-password').value;
+
+            if (window.RAS) {
+                const result = RAS.authenticateStaff(selectedStaffRole, phone, pass);
+                if (result.success) {
+                    showAlert(`Authenticated as ${selectedStaffRole}! Opening management suite...`, false);
+                    document.getElementById('staff-submit-btn').disabled = true;
+                    setTimeout(() => {
+                        window.location.href = result.redirect;
+                    }, 600);
+                } else {
+                    showAlert(result.message, true);
+                }
+            } else {
+                // Fallback
+                const targetPages = {
+                    'Owner': 'owner.html',
+                    'Manager': 'manager.html',
+                    'Chef': 'chef.html',
+                    'Vendor': 'vendor.html'
+                };
+                window.location.href = targetPages[selectedStaffRole] || 'staff-role.html';
+            }
+        }
+
+        function handleForgotPassword(type) {
+            const phone = prompt('Enter your registered 10-digit mobile number to reset password:');
+            if (phone && phone.replace(/\D/g, '').length === 10) {
+                alert(`Password reset OTP has been sent via SMS to +91 ${phone.replace(/\D/g, '')}.`);
+            } else if (phone) {
+                alert('Please enter a valid 10-digit phone number.');
+            }
+        }
+    </script>
+
+</body>
+</html>

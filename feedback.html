@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Service Feedback | La Tavola</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+
+</head>
+
+
+<body>
+
+    <!-- NAVBAR -->
+
+    <nav class="navbar">
+
+        <div class="logo">
+            LA TAVOLA
+            <span>RESTAURANT</span>
+        </div>
+
+        <div class="nav-links">
+
+            <a href="index.html">Home</a>
+            <a href="customer.html">My Account</a>
+            <a href="customer.html">Back</a>
+
+        </div>
+
+    </nav>
+
+
+    <!-- FEEDBACK PAGE -->
+
+    <main class="feedback-page">
+
+        <div class="feedback-header">
+
+            <p class="section-label">
+                SERVICE FEEDBACK
+            </p>
+
+            <h1>
+                Tell us about your experience.
+            </h1>
+
+            <p>
+                Your feedback helps us make every visit better.
+            </p>
+
+        </div>
+
+
+        <div class="feedback-card">
+
+            <!-- RATING -->
+
+            <div class="feedback-section">
+
+                <p class="feedback-label">
+                    HOW WAS YOUR EXPERIENCE?
+                </p>
+
+                <div class="rating-options">
+
+                    <button type="button" onclick="selectRating(1)">1</button>
+                    <button type="button" onclick="selectRating(2)">2</button>
+                    <button type="button" onclick="selectRating(3)">3</button>
+                    <button type="button" onclick="selectRating(4)">4</button>
+                    <button type="button" onclick="selectRating(5)">5</button>
+
+                </div>
+
+                <p id="rating-text" class="rating-text">
+                    Select a rating
+                </p>
+
+            </div>
+
+
+            <!-- FEEDBACK -->
+
+            <div class="feedback-section">
+
+                <label
+                    for="feedback-message"
+                    class="feedback-label">
+
+                    YOUR FEEDBACK
+
+                </label>
+
+                <textarea
+                    id="feedback-message"
+                    placeholder="Tell us what you liked or what we could improve...">
+                </textarea>
+
+            </div>
+
+
+            <!-- SUBMIT -->
+
+            <button
+                class="feedback-submit"
+                onclick="submitFeedback()">
+
+                Submit Feedback →
+
+            </button>
+
+
+            <p class="feedback-note">
+                Thank you for helping La Tavola improve.
+            </p>
+
+        </div>
+
+
+        <div class="feedback-back">
+
+            <a href="customer.html">
+                ← Back to Customer Dashboard
+            </a>
+
+        </div>
+
+    </main>
+
+
+    <!-- FOOTER -->
+
+    <footer class="footer">
+
+        <div>
+
+            <strong>
+                LA TAVOLA
+            </strong>
+
+            <p>
+                A taste worth remembering.
+            </p>
+
+        </div>
+
+        <div>
+
+            <p>
+                Kolkata, West Bengal
+            </p>
+
+            <p>
+                Open daily · 11:00 AM – 11:00 PM
+            </p>
+
+        </div>
+
+    </footer>
+
+
+    <!-- JAVASCRIPT -->
+
+    <script>
+
+        let selectedRating = 0;
+
+
+        function selectRating(rating) {
+
+            selectedRating = rating;
+
+
+            const buttons =
+                document.querySelectorAll(".rating-options button");
+
+
+            buttons.forEach(button => {
+
+                button.classList.remove("selected");
+
+            });
+
+
+            buttons[rating - 1].classList.add("selected");
+
+
+            const ratingText =
+                document.getElementById("rating-text");
+
+
+            const messages = {
+
+                1: "We'll work harder to improve.",
+                2: "Thank you for your honest feedback.",
+                3: "We're glad you had a decent experience.",
+                4: "We're happy you enjoyed your experience!",
+                5: "We're thrilled you loved La Tavola!"
+
+            };
+
+
+            ratingText.textContent =
+                messages[rating];
+
+        }
+
+
+        function submitFeedback() {
+
+            const message =
+                document.getElementById(
+                    "feedback-message"
+                ).value.trim();
+
+
+            if (selectedRating === 0) {
+
+                alert(
+                    "Please select a rating before submitting."
+                );
+
+                return;
+
+            }
+
+
+            if (message === "") {
+
+                alert(
+                    "Please write some feedback before submitting."
+                );
+
+                return;
+
+            }
+
+
+            const feedbackData = {
+
+                rating: selectedRating,
+
+                message: message,
+
+                submitted: true
+
+            };
+
+
+            localStorage.setItem(
+                "laTavolaFeedback",
+                JSON.stringify(feedbackData)
+            );
+
+
+            alert(
+                "Thank you! Your feedback has been submitted successfully."
+            );
+
+
+            window.location.href =
+                "customer.html";
+
+        }
+
+    </script>
+
+
+</body>
+
+</html>
